@@ -16,6 +16,7 @@ import com.github.javaparser.ast.expr.BinaryExpr.Operator;
 import com.github.javaparser.ast.expr.BooleanLiteralExpr;
 import com.github.javaparser.ast.expr.ConditionalExpr;
 import com.github.javaparser.ast.expr.EnclosedExpr;
+import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.PrimitiveType.Primitive;
@@ -26,9 +27,8 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeS
 
 import br.ufmg.labsoft.mutvariants.util.Constants;
 import br.ufmg.labsoft.mutvariants.util.IO;
-import br.ufmg.labsoft.mutvariants.util.JavaOperatorsGroups;
+import br.ufmg.labsoft.mutvariants.util.JavaBinaryOperatorsGroups;
 import br.ufmg.labsoft.mutvariants.util.TypeUtil;
-//import gov.nasa.jpf.annotation.Conditional;
 
 /*
  * TODO(s)
@@ -42,19 +42,30 @@ import br.ufmg.labsoft.mutvariants.util.TypeUtil;
  */
 
 /**
- * Version: 0.12
  *
  * @author jpaulo
- * Dependency: JavaParser API (javaparser.org)
  */
 public class MutantsGenerator {
 
 	private String currentClassName;
 	private int mutantsCounterPerClass;
 	private long mutantsCounterGlobal;
-
+	
+	/**
+	 * generates all possible mutants per spot
+	 * E.g.: for a + b expression, all available mutations -, *, / and %
+	 */
+	private boolean allPossibleMutationsPerSpot;
 	private MutationStrategy mutStrategy;
 	private TypeSolver typeSolver;
+	
+	public boolean getAllPossibleMutationsPerSpot() {
+		return allPossibleMutationsPerSpot;
+	}
+
+	public void setAllPossibleMutationsPerSpot(boolean allPossibleMutationsPerSpot) {
+		this.allPossibleMutationsPerSpot = allPossibleMutationsPerSpot;
+	}
 
 	public MutantsGenerator() {
 		this(new OneBinaryExprPerStatementMutationStrategy(), new ReflectionTypeSolver());
@@ -101,7 +112,7 @@ public class MutantsGenerator {
 			NodeList<VariableDeclarator> variables = new NodeList<>();
 			for (int m=0; m < this.mutantsCounterPerClass; ++m) {
 				variables.add(new VariableDeclarator(new PrimitiveType(Primitive.BOOLEAN),
-						formMutantVariableName(this.currentClassName, m), new BooleanLiteralExpr(false)));
+						buildMutantVariableName(this.currentClassName, m), new BooleanLiteralExpr(false)));
 			}
 
 			FieldDeclaration fieldDecl = new FieldDeclaration(EnumSet.of(Modifier.PUBLIC, Modifier.STATIC), variables);
@@ -154,7 +165,7 @@ public class MutantsGenerator {
 		return original;
 	}
 
-	private static String formMutantVariableName(String className, long mutSeq) {
+	private static String buildMutantVariableName(String className, long mutSeq) {
 
 		return Constants.MUTANT_VARIABLE_PREFIX1 + className
 				+ Constants.MUTANT_VARIABLE_PREFIX2 + mutSeq;
@@ -162,13 +173,14 @@ public class MutantsGenerator {
 
 	/**
 	 * 
-	 * @param original
-	 * @return (_PREFIX_mut# ? (operand1 MUTATION operand2) : (operand1 ORIGINAL operand2))
+	 * @param original operand1 ORIGINAL operand2
+	 * @return (_PREFIX_mut# ? (operand1 MUTATION1 operand2) : (operand1 ORIGINAL operand2)) or 
+	 * (_PREFIX_mut## ? (operand1 MUTATION2 operand2) : (_PREFIX_mut# ? (operand1 MUTATION1 operand2) : (operand1 ORIGINAL operand2)))
 	 * @throws Exception
 	 */
-	public EnclosedExpr mutateBinaryExpression(BinaryExpr original) { //throws RuntimeException
+	public EnclosedExpr mutateBinaryExpression(BinaryExpr original) { //throws RuntimeException, boolean allAvailableMutants
 
-		boolean equalityOperatorNoNumbers = false;
+//		boolean equalityOperatorNoNumbers = false; //TODO review
 
 		//avoiding mutating String concatenator operator +
 		if (BinaryExpr.Operator.PLUS.equals(original.getOperator())) {
@@ -180,60 +192,59 @@ public class MutantsGenerator {
 			}
 		}
 		//checking == or != with numbers
-		else if (EnumSet.of(BinaryExpr.Operator.EQUALS, BinaryExpr.Operator.NOT_EQUALS).contains(original.getOperator())) {
+		else if (JavaBinaryOperatorsGroups.equalityOperators.contains(original.getOperator())) {
 
 			ResolvedType typeLeft = JavaParserFacade.get(this.typeSolver).getType(original.getLeft());
 			ResolvedType typeRight = JavaParserFacade.get(this.typeSolver).getType(original.getRight());
 
 			//ensures mutations on expressions like var.size() == 4
 			if (!TypeUtil.isNumberPrimitiveOrWrapper(typeLeft) || !TypeUtil.isNumberPrimitiveOrWrapper(typeRight)) {
-//				equalityOperatorNoNumbers = true; //TODO review
+//				equalityOperatorNoNumbers = true;
 //				throw new RuntimeException("can't 2: " + original);
 				return null;
 			}
 		}
 
-		BinaryExpr mutated = original.clone();
-		mutated.setOperator(mutatedOperator(original.getOperator(), equalityOperatorNoNumbers));
+		EnumSet<Operator> mOperators = getAllPossibleMutationsPerSpot() ? 
+				availableOperatorsForMutation(original.getOperator(), false) :
+				EnumSet.of(operatorForMutation(original.getOperator(), false) ); 
 
-		String mutantVariableName = formMutantVariableName(
-//				original.getAncestorOfType(ClassOrInterfaceDeclaration.class).get().getNameAsString(), 
-				this.currentClassName, 
-				mutantsCounterPerClass++);
-		
-		ConditionalExpr mutantExpression = new ConditionalExpr(
-				new NameExpr(mutantVariableName),
-				new EnclosedExpr(mutated), new EnclosedExpr(original.clone()));
+		Expression mutantExpressionTemp = original.clone();
 
-		return new EnclosedExpr(mutantExpression);
+		for (Operator op : mOperators) {
+
+			BinaryExpr mutated = original.clone();
+			mutated.setOperator(op);
+
+			String mutantVariableName = buildMutantVariableName(
+					this.currentClassName, //previously: original.getAncestorOfType(ClassOrInterfaceDeclaration.class).get().getNameAsString() 
+					mutantsCounterPerClass++);
+
+			mutantExpressionTemp = new ConditionalExpr(
+					new NameExpr(mutantVariableName), 
+					new EnclosedExpr(mutated),
+					new EnclosedExpr(mutantExpressionTemp.clone()));
+		}
+
+		return new EnclosedExpr(mutantExpressionTemp);
 	}
+	
+	public static Operator operatorForMutation(Operator original, boolean onlyEqualityOperators) {
 
-	public static Operator mutatedOperator(Operator original, boolean onlyEqualityOperators) {
+		EnumSet<Operator> tempEnumSet = availableOperatorsForMutation(original, onlyEqualityOperators);
 
-		EnumSet<Operator> tempEnumSet = null;
-
-		if (JavaOperatorsGroups.arithmeticOperators.contains(original)) {
-			tempEnumSet = JavaOperatorsGroups.arithmeticOperators.clone();
-			//tempEnumSet.addAll(Constants.bitwiseOperators);
-		}
-		else if (JavaOperatorsGroups.logicalOperators.contains(original)) {
-			tempEnumSet = JavaOperatorsGroups.logicalOperators.clone();
-			//tempEnumSet.addAll(Constants.bitwiseOperators);
-		}
-		else if (JavaOperatorsGroups.relationalOperators.contains(original)) {
-			tempEnumSet = onlyEqualityOperators ? JavaOperatorsGroups.equalityOperators.clone()
-					: JavaOperatorsGroups.relationalOperators.clone();
-		}
-		else {
-			throw new RuntimeException("[ERROR] Unexpected operator to mutate: " + original);
-		}
-
-		Operator[] tempArray = new Operator[tempEnumSet.size() - 1];
-		tempEnumSet.remove(original);
+		Operator[] tempArray = new Operator[tempEnumSet.size()];
 		tempEnumSet.toArray(tempArray);
 
 		int index = new Random().nextInt(tempArray.length);
 		return tempArray[index];
+	}
+
+	public static EnumSet<Operator> availableOperatorsForMutation(Operator original, boolean onlyEqualityOperators) {
+
+		EnumSet<Operator> tempEnumSet = JavaBinaryOperatorsGroups.belongingGroup(original, onlyEqualityOperators);
+		tempEnumSet.remove(original);
+		return tempEnumSet;
 	}
 
 	/**

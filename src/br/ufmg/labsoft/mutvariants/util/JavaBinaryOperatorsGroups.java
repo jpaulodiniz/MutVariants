@@ -7,7 +7,7 @@ import com.github.javaparser.ast.expr.BinaryExpr.Operator;
 /**
  *  Syntactic Groups (EnumSets) of Java operators
  */
-public class JavaOperatorsGroups {
+public class JavaBinaryOperatorsGroups {
 
 	/**
 	 * + - * / %
@@ -39,6 +39,36 @@ public class JavaOperatorsGroups {
 	public static final EnumSet<Operator> bitwiseOperators = EnumSet.of(Operator.XOR,
 			Operator.BINARY_AND, Operator.BINARY_OR,
 			Operator.LEFT_SHIFT, Operator.SIGNED_RIGHT_SHIFT, Operator.UNSIGNED_RIGHT_SHIFT);
+
+
+	/**
+	 *
+	 * @param original
+	 * @param onlyEqualityOperators
+	 * @return cloned belonging group
+	 */
+	public static EnumSet<Operator> belongingGroup(Operator original, boolean onlyEqualityOperators) {
+		
+		EnumSet<Operator> tempEnumSet = null;
+		
+		if (arithmeticOperators.contains(original)) {
+			tempEnumSet = arithmeticOperators.clone();
+			//tempEnumSet.addAll(Constants.bitwiseOperators);
+		}
+		else if (logicalOperators.contains(original)) {
+			tempEnumSet = logicalOperators.clone();
+			//tempEnumSet.addAll(Constants.bitwiseOperators);
+		}
+		else if (relationalOperators.contains(original)) {
+			tempEnumSet = onlyEqualityOperators ? equalityOperators.clone()
+					: relationalOperators.clone();
+		}
+		else {
+			throw new RuntimeException("[ERROR] Unexpected operator to mutate: " + original);
+		}
+		
+		return tempEnumSet;
+	}
 
 /*	some useful Set Java commands
 	public static void main(String... args) {

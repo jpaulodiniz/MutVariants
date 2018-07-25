@@ -12,27 +12,32 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeS
 import br.ufmg.labsoft.mutvariants.mutants.AllBinaryExprMutationStrategy;
 import br.ufmg.labsoft.mutvariants.mutants.MutantsGenerator;
 import br.ufmg.labsoft.mutvariants.mutants.MutationStrategy;
+import br.ufmg.labsoft.mutvariants.mutants.OneBinaryExprPerStatementMutationStrategy;
 import br.ufmg.labsoft.mutvariants.util.CompilationUnitSamples;
 import br.ufmg.labsoft.mutvariants.util.IO;
 
 public class Main {
 	
-	private static String baseDir = "/home/.../Desktop/"; //TODO change path
+	private static String baseDir = "/home/.../"; //TODO change path
 
 	public static void main(String[] args) {
 		
-		MutationStrategy mutStrategy = new AllBinaryExprMutationStrategy(); //or OneBinaryExprPerStatementMutationStrategy 
+		MutationStrategy mutStrategy = new AllBinaryExprMutationStrategy(); //or OneBinaryExprPerStatementMutationStrategy()
 
 		CombinedTypeSolver typeSolvers = new CombinedTypeSolver();
 		typeSolvers.add(new ReflectionTypeSolver());
 		typeSolvers.add(new JavaParserTypeSolver(baseDir + "systems/original/.../src/main/java")); //TODO change path
 //		try {
-//			typeSolvers.add(new JarTypeSolver(rootDir + "systems/commons-cli-1.4/commons-cli-1.4.jar")); //TODO change paths
+//			typeSolvers.add(new JarTypeSolver(rootDir + "systems/.../?.jar")); //TODO change paths
 //		} catch (IOException e) {
 //			e.printStackTrace();
 //		}
 
-		MutantsGenerator mg = new MutantsGenerator(mutStrategy, typeSolvers);
+		MutantsGenerator mg = new MutantsGenerator();
+		mg.setMutStrategy(mutStrategy);
+		mg.setTypeSolver(typeSolvers);
+		mg.setAllPossibleMutationsPerSpot(true);
+
 		mg.mutatePackageOrDirectory(baseDir + "systems/original/.../src/main/java", //TODO change path	
 				baseDir + "systems/mutated/main/v04"); //TODO change path
 //		mutateOneClass(mg);
@@ -79,7 +84,7 @@ public class Main {
 			System.out.println();
 			for (int i = 0; i < 3; ++i) {
 				try {
-					System.out.println(op + " into " + MutantsGenerator.mutatedOperator(op, false));
+					System.out.println(op + " into " + MutantsGenerator.operatorForMutation(op, false));
 				} catch (Exception e) {
 					System.err.println(e.getMessage());
 					continue main_loop;
