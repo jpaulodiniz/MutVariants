@@ -56,7 +56,7 @@ public class MutantsGenerator {
 	 * E.g.: for a + b expression, all available mutations -, *, / and %
 	 */
 	private boolean allPossibleMutationsPerSpot;
-	private double mutationRate = 1f; 
+	private double mutationRate = 1d; 
 	private MutationStrategy mutStrategy;
 	private TypeSolver typeSolver;
 
