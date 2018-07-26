@@ -56,16 +56,9 @@ public class MutantsGenerator {
 	 * E.g.: for a + b expression, all available mutations -, *, / and %
 	 */
 	private boolean allPossibleMutationsPerSpot;
+	private double mutationRate = 1f; 
 	private MutationStrategy mutStrategy;
 	private TypeSolver typeSolver;
-	
-	public boolean getAllPossibleMutationsPerSpot() {
-		return allPossibleMutationsPerSpot;
-	}
-
-	public void setAllPossibleMutationsPerSpot(boolean allPossibleMutationsPerSpot) {
-		this.allPossibleMutationsPerSpot = allPossibleMutationsPerSpot;
-	}
 
 	public MutantsGenerator() {
 		this(new OneBinaryExprPerStatementMutationStrategy(), new ReflectionTypeSolver());
@@ -75,6 +68,22 @@ public class MutantsGenerator {
 		super();
 		this.mutStrategy = mutStrategy;
 		this.typeSolver = typeSolver;
+	}
+
+	public boolean getAllPossibleMutationsPerSpot() {
+		return allPossibleMutationsPerSpot;
+	}
+
+	public void setAllPossibleMutationsPerSpot(boolean allPossibleMutationsPerSpot) {
+		this.allPossibleMutationsPerSpot = allPossibleMutationsPerSpot;
+	}
+
+	public double getMutationRate() {
+		return mutationRate;
+	}
+
+	public void setMutationRate(double mutationRate) {
+		this.mutationRate = mutationRate;
 	}
 
 	public MutationStrategy getMutStrategy() {
@@ -152,7 +161,6 @@ public class MutantsGenerator {
 
 		if (mutantsCounterPerCompUn > 0) {
 			//add import Conditional
-//			mcu.addImport(Conditional.class);
 //			mcu.addImport(new ImportDeclaration(new Name("gov.nasa.jpf.annotation.Conditional"), false, false));
 			mcu.addImport("gov.nasa.jpf.annotation.Conditional");
 
@@ -205,13 +213,15 @@ public class MutantsGenerator {
 			}
 		}
 
-		EnumSet<Operator> mOperators = getAllPossibleMutationsPerSpot() ? 
+		EnumSet<Operator> mOperators = this.getAllPossibleMutationsPerSpot() ? 
 				availableOperatorsForMutation(original.getOperator(), false) :
 				EnumSet.of(operatorForMutation(original.getOperator(), false) ); 
 
 		Expression mutantExpressionTemp = original.clone();
 
 		for (Operator op : mOperators) {
+			
+			if (Math.random() > this.getMutationRate()) continue;
 
 			BinaryExpr mutated = original.clone();
 			mutated.setOperator(op);
