@@ -8,9 +8,12 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.EnclosedExpr;
 import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.stmt.DoStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
+import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
+import com.github.javaparser.ast.stmt.WhileStmt;
 
 /**
  * 
@@ -48,7 +51,35 @@ public class OneBinaryExprPerStatementMutationStrategy implements MutationStrate
 			this.mutateOneBinaryExpression(binaryExpressions, mGen);
 		}
 		
-		//TODO DoStmt, WhileStmt, ForStmt, ForeachStmt ???
+		if (mGen.getMutateLoopConditions()) {
+			List<ForStmt> forStatements = mClass.findAll(ForStmt.class);
+			List<WhileStmt> whileStatements = mClass.findAll(WhileStmt.class);
+			List<DoStmt> doStatements = mClass.findAll(DoStmt.class);
+
+			for (ForStmt forStmt : forStatements) {
+				List<BinaryExpr> binaryExpressions = new ArrayList<>();
+				Expression forComparison = forStmt.getCompare().get();
+
+				binaryExpressions.addAll(forComparison.findAll(BinaryExpr.class));
+				this.mutateOneBinaryExpression(binaryExpressions, mGen);
+			}
+
+			for (WhileStmt whileStmt : whileStatements) {
+				List<BinaryExpr> binaryExpressions = new ArrayList<>();
+				Expression whileCondition = whileStmt.getCondition();
+
+				binaryExpressions.addAll(whileCondition.findAll(BinaryExpr.class));
+				this.mutateOneBinaryExpression(binaryExpressions, mGen);
+			}
+
+			for (DoStmt doStmt : doStatements) {
+				List<BinaryExpr> binaryExpressions = new ArrayList<>();
+				Expression doCondition = doStmt.getCondition();
+
+				binaryExpressions.addAll(doCondition.findAll(BinaryExpr.class));
+				this.mutateOneBinaryExpression(binaryExpressions, mGen);
+			}
+		}
 	}
 	
 	/**

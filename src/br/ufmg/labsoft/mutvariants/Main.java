@@ -34,10 +34,11 @@ public class Main {
 //		}
 
 		MutantsGenerator mg = new MutantsGenerator();
+		mg.setAllPossibleMutationsPerSpot(true);
+//		mg.setMutateLoopConditions(false);
+//		mg.setMutationRate(0.5);
 		mg.setMutStrategy(mutStrategy);
 		mg.setTypeSolver(typeSolvers);
-		mg.setAllPossibleMutationsPerSpot(true);
-//		mg.setMutationRate(0.5);
 
 		mg.mutatePackageOrDirectory(baseDir + "systems/original/.../src/main/java", //TODO change path	
 				baseDir + "systems/mutated/main/v04"); //TODO change path

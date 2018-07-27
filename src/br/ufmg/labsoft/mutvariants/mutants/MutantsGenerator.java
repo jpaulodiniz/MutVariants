@@ -55,7 +55,8 @@ public class MutantsGenerator {
 	 * generates all possible mutants per spot
 	 * E.g.: for a + b expression, all available mutations -, *, / and %
 	 */
-	private boolean allPossibleMutationsPerSpot;
+	private boolean allPossibleMutationsPerSpot = false;
+	private boolean mutateLoopConditions = false;
 	private double mutationRate = 1d; 
 	private MutationStrategy mutStrategy;
 	private TypeSolver typeSolver;
@@ -72,6 +73,14 @@ public class MutantsGenerator {
 
 	public boolean getAllPossibleMutationsPerSpot() {
 		return allPossibleMutationsPerSpot;
+	}
+
+	public boolean getMutateLoopConditions() {
+		return mutateLoopConditions;
+	}
+
+	public void setMutateLoopConditions(boolean mutateLoopConditions) {
+		this.mutateLoopConditions = mutateLoopConditions;
 	}
 
 	public void setAllPossibleMutationsPerSpot(boolean allPossibleMutationsPerSpot) {

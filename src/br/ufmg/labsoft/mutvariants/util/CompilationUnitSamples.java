@@ -35,6 +35,11 @@ public class CompilationUnitSamples {
 				+ "   System.out.println(\"Out of bounds\" + a - CONST);"
 				+ "   return;"
 				+ "  }"
+				+ "  int b = 5;"
+				+ "  while (b < 10) {"
+				+ "   System.out.println(b);"
+				+ "   b++;"
+				+ "  }"
 				+ " }"
 				+ "}");
 
