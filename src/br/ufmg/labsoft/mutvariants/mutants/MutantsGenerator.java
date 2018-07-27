@@ -134,10 +134,10 @@ public class MutantsGenerator {
 			}
 
 			FieldDeclaration fieldDecl = new FieldDeclaration(EnumSet.of(Modifier.PUBLIC, Modifier.STATIC), variables);
-			fieldDecl.addMarkerAnnotation("Conditional");
+			fieldDecl.addMarkerAnnotation(Constants.VAREXJ_CONDITIONAL_NAME);
 
 //			NodeList<AnnotationExpr> annotations = new NodeList<>();
-//			annotations.add(new MarkerAnnotationExpr("Conditional"));
+//			annotations.add(new MarkerAnnotationExpr(Constants.VAREXJ_CONDITIONAL_NAME));
 //			FieldDeclaration fieldDecl2 = new FieldDeclaration(EnumSet.of(Modifier.PUBLIC, Modifier.STATIC),
 //					annotations, variables);
 
@@ -170,8 +170,8 @@ public class MutantsGenerator {
 
 		if (mutantsCounterPerCompUn > 0) {
 			//add import Conditional
-//			mcu.addImport(new ImportDeclaration(new Name("gov.nasa.jpf.annotation.Conditional"), false, false));
-			mcu.addImport("gov.nasa.jpf.annotation.Conditional");
+//			mcu.addImport(new ImportDeclaration(new Name(Constants.VAREXJ_CONDITIONAL_FQN), false, false));
+			mcu.addImport(Constants.VAREXJ_CONDITIONAL_FQN);
 
 			System.out.println(">>>> " + mutantsCounterPerCompUn + " mutants seeded (in Comp. Unit).");
 
@@ -282,7 +282,7 @@ public class MutantsGenerator {
 			CompilationUnit original = IO.getCompilationUnitFromFile(f);
 			CompilationUnit mutated = this.generateMutants(original);
 
-			if (mutated.getImports().stream().anyMatch(i -> i.getNameAsString().startsWith("gov.nasa.jpf.annotation.Conditional"))) {
+			if (mutated.getImports().stream().anyMatch(i -> i.getNameAsString().startsWith(Constants.VAREXJ_CONDITIONAL_FQN))) {
 				++countMutatedCompilationUnits;
 			}
 
