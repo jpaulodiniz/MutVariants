@@ -31,7 +31,6 @@ public class IO {
 
 		try {
 			if (!outputDirectory.exists())
-				System.out.println(outputDirectory.mkdirs());
 				outputDirectory.mkdirs();
 
 			FileWriter fw = new FileWriter(new File(outputDirectory, fileName));
