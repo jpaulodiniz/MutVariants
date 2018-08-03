@@ -211,6 +211,11 @@ public class MutantsGenerator {
 		//checking == or != with numbers
 		else if (JavaBinaryOperatorsGroups.equalityOperators.contains(original.getOperator())) {
 
+			if (original.getRight().toString().equals("null") || original.getLeft().toString().equals("null")) {
+//				equalityOperatorNoNumbers = true;
+				return null;
+			}
+			
 			ResolvedType typeLeft = JavaParserFacade.get(this.typeSolver).getType(original.getLeft());
 			ResolvedType typeRight = JavaParserFacade.get(this.typeSolver).getType(original.getRight());
 
