@@ -18,8 +18,7 @@ public class JavaBinaryOperatorsGroups {
 	/**
 	 * && ||
 	 */
-	public static final EnumSet<Operator> logicalOperators = EnumSet.of(Operator.AND, 
-			Operator.OR);
+	public static final EnumSet<Operator> logicalOperators = EnumSet.of(Operator.AND, Operator.OR);
 
 	/**
 	 * == !=
@@ -63,9 +62,9 @@ public class JavaBinaryOperatorsGroups {
 			tempEnumSet = onlyEqualityOperators ? equalityOperators.clone()
 					: relationalOperators.clone();
 		}
-		else {
-			throw new RuntimeException("[ERROR] Unexpected operator to mutate: " + original);
-		}
+//		else { //bitwiseOperators
+//			throw new RuntimeException("[ERROR] Unexpected operator to mutate: " + original); //TODO review
+//		}
 		
 		return tempEnumSet;
 	}

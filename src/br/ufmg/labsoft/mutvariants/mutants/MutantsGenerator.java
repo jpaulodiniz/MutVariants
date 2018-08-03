@@ -225,6 +225,8 @@ public class MutantsGenerator {
 		EnumSet<Operator> mOperators = this.getAllPossibleMutationsPerSpot() ? 
 				availableOperatorsForMutation(original.getOperator(), false) :
 				EnumSet.of(operatorForMutation(original.getOperator(), false) ); 
+				
+		if (mOperators == null || mOperators.isEmpty()) return null;
 
 		Expression mutantExpressionTemp = original.clone();
 
@@ -262,6 +264,10 @@ public class MutantsGenerator {
 	public static EnumSet<Operator> availableOperatorsForMutation(Operator original, boolean onlyEqualityOperators) {
 
 		EnumSet<Operator> tempEnumSet = JavaBinaryOperatorsGroups.belongingGroup(original, onlyEqualityOperators);
+		
+		if (tempEnumSet == null)
+			return null;
+
 		tempEnumSet.remove(original);
 		return tempEnumSet;
 	}
@@ -269,10 +275,11 @@ public class MutantsGenerator {
 	/**
 	 *
 	 * @param inputPath
-	 * TODO recursive ???
 	 */
 	public void mutatePackageOrDirectory(String inputPath, String outputPath) {
 
+		long ini = System.currentTimeMillis();
+		
 		this.mutantsCounterGlobal = 0;
 		int countMutatedCompilationUnits = 0;
 
@@ -288,8 +295,11 @@ public class MutantsGenerator {
 
 			IO.writeCompilationUnit(mutated, new File(outputPath));
 		}
-
+		
+		long fin = System.currentTimeMillis();
+		
 		System.out.println(">>>>> " + countMutatedCompilationUnits + " mutated compilation units.");
 		System.out.println(">>>>> " + this.mutantsCounterGlobal + " mutants seeded (total).");
+		System.out.println(">>>>> in " + (fin - ini) + "(ms)");
 	}
 }
