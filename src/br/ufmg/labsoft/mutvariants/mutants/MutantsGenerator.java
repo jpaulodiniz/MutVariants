@@ -1,8 +1,11 @@
 package br.ufmg.labsoft.mutvariants.mutants;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import com.github.javaparser.ast.CompilationUnit;
@@ -47,10 +50,10 @@ import br.ufmg.labsoft.mutvariants.util.TypeUtil;
  */
 public class MutantsGenerator {
 
-	private String currentClassName;
-	private int mutantsCounterPerClass;
-	private long mutantsCounterGlobal;
-	
+	private Map<String, List<String>> mutantsPerClass; //key: class FQN; value: list of mutants
+	private String currentClassFQN; //helper field: current class fully qualified name (FQN)
+	private long mutantsCounterGlobal; //helper field
+
 	/**
 	 * generates all possible mutants per spot
 	 * E.g.: for a + b expression, all available mutations -, *, / and %
@@ -66,7 +69,7 @@ public class MutantsGenerator {
 	}
 
 	public MutantsGenerator(MutationStrategy mutStrategy, TypeSolver typeSolver) {
-		super();
+		this.mutantsPerClass = new HashMap<>();
 		this.mutStrategy = mutStrategy;
 		this.typeSolver = typeSolver;
 	}
@@ -116,21 +119,24 @@ public class MutantsGenerator {
 	 * @return
 	 */
 	private void generateMutants(ClassOrInterfaceDeclaration mClass) {
-		this.currentClassName = mClass.getNameAsString();
-		if (this.currentClassName.endsWith("Exception")) {
+
+		this.currentClassFQN = mClass.findCompilationUnit().get().getPackageDeclaration().get().getNameAsString()
+				+ '.' + mClass.getNameAsString();
+		if (this.currentClassFQN.endsWith("Exception")) {
 			return;
 		}
 		
 		//strategy
 		this.getMutStrategy().generateMutants(mClass, this);
 
-		if (this.mutantsCounterPerClass > 0) {
-			//adding declarations for all conditional mutant variables
+		if (this.mutantsPerClass.get(this.currentClassFQN) != null &&
+				!this.mutantsPerClass.get(this.currentClassFQN).isEmpty()) {
 
+		//adding declarations for all conditional mutant variables
 			NodeList<VariableDeclarator> variables = new NodeList<>();
-			for (int m=0; m < this.mutantsCounterPerClass; ++m) {
+			for (String mutName : this.mutantsPerClass.get(this.currentClassFQN)) {
 				variables.add(new VariableDeclarator(new PrimitiveType(Primitive.BOOLEAN),
-						buildMutantVariableName(this.currentClassName, m), new BooleanLiteralExpr(false)));
+						mutName, new BooleanLiteralExpr(false)));
 			}
 
 			FieldDeclaration fieldDecl = new FieldDeclaration(EnumSet.of(Modifier.PUBLIC, Modifier.STATIC), variables);
@@ -163,9 +169,10 @@ public class MutantsGenerator {
 
 		//mutate each class in compilation unit
 		for (ClassOrInterfaceDeclaration aClass : classes) {
-			this.mutantsCounterPerClass = 0;
 			this.generateMutants(aClass);
-			mutantsCounterPerCompUn += this.mutantsCounterPerClass;
+			if (this.mutantsPerClass.get(this.currentClassFQN) != null) {
+				mutantsCounterPerCompUn += this.mutantsPerClass.get(this.currentClassFQN).size();
+			}
 		}
 
 		if (mutantsCounterPerCompUn > 0) {
@@ -175,17 +182,26 @@ public class MutantsGenerator {
 
 			System.out.println(">>>> " + mutantsCounterPerCompUn + " mutants seeded (in Comp. Unit).");
 
-			this.mutantsCounterGlobal += mutantsCounterPerCompUn;
 			return mcu;
 		}
 
 		return original;
 	}
 
-	private static String buildMutantVariableName(String className, long mutSeq) {
+	private String buildMutantVariableName(String classFQN, long mutSeq) {
 
-		return Constants.MUTANT_VARIABLE_PREFIX1 + className
-				+ Constants.MUTANT_VARIABLE_PREFIX2 + mutSeq;
+		StringBuilder mutantName = new StringBuilder();
+//		mutantName.append(Constants.MUTANT_VARIABLE_PREFIX1);
+//		mutantName.append(simplify(classFQN));
+		mutantName.append(Constants.MUTANT_VARIABLE_PREFIX2);
+		mutantName.append(mutSeq);
+		
+		if (this.mutantsPerClass.get(classFQN) == null) {
+			this.mutantsPerClass.put(classFQN, new ArrayList<>());
+		}
+		this.mutantsPerClass.get(classFQN).add(mutantName.toString());
+		
+		return mutantName.toString();
 	}
 
 	/**
@@ -243,8 +259,10 @@ public class MutantsGenerator {
 			mutated.setOperator(op);
 
 			String mutantVariableName = buildMutantVariableName(
-					this.currentClassName, //previously: original.getAncestorOfType(ClassOrInterfaceDeclaration.class).get().getNameAsString() 
-					mutantsCounterPerClass++);
+					this.currentClassFQN, 
+					this.mutantsCounterGlobal);
+			
+			++this.mutantsCounterGlobal;
 
 			mutantExpressionTemp = new ConditionalExpr(
 					new NameExpr(mutantVariableName), 
@@ -300,11 +318,13 @@ public class MutantsGenerator {
 
 			IO.writeCompilationUnit(mutated, new File(outputPath));
 		}
-		
+
 		long fin = System.currentTimeMillis();
 		
-		System.out.println(">>>>> " + countMutatedCompilationUnits + " mutated compilation units.");
-		System.out.println(">>>>> " + this.mutantsCounterGlobal + " mutants seeded (total).");
-		System.out.println(">>>>> in " + (fin - ini) + "(ms)");
+		System.out.println("\n>>>>> " + this.mutantsCounterGlobal + " mutants seeded (total)");
+		System.out.println(">>>>> in " + countMutatedCompilationUnits + " mutated compilation units");
+		System.out.println(">>>>> in " + (fin - ini) + "ms");
+		
+		System.out.println(">>>>> Mutants Mapping:\n" + this.mutantsPerClass);
 	}
 }
