@@ -45,10 +45,7 @@ public class Main {
 		}
 
 		MutationStrategy mutStrategy = new AllBinaryExprMutationStrategy();
-//		MutationStrategy mutStrategy = new OneBinaryExprPerStatementMutationStrategy(); 
-//		MutationStrategy mutStrategy = new OneNameExprPerStatementMutStr();
 
-//		MutantsGenerator mg = new MutGenClassic();
 		MutantsGenerator mg = new MutantsGenerator();
 		mg.setAllPossibleMutationsPerSpot(true);
 		mg.setMutateLoopConditions(false);
