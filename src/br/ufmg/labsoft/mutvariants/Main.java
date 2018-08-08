@@ -1,57 +1,72 @@
 package br.ufmg.labsoft.mutvariants;
 
-import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.EnumSet;
+import java.util.Properties;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.BinaryExpr.Operator;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.JarTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 
 import br.ufmg.labsoft.mutvariants.mutants.AllBinaryExprMutationStrategy;
 import br.ufmg.labsoft.mutvariants.mutants.MutantsGenerator;
 import br.ufmg.labsoft.mutvariants.mutants.MutationStrategy;
-import br.ufmg.labsoft.mutvariants.mutants.OneBinaryExprPerStatementMutationStrategy;
 import br.ufmg.labsoft.mutvariants.util.CompilationUnitSamples;
 import br.ufmg.labsoft.mutvariants.util.IO;
 
 public class Main {
 	
-	private static String baseDir = "/home/.../"; //TODO change path
-
 	public static void main(String[] args) {
 		
-		MutationStrategy mutStrategy = new AllBinaryExprMutationStrategy(); //or OneBinaryExprPerStatementMutationStrategy()
+		//TODO change path and/or properties name
+		Properties ioConf = IO.loadProperties("resources/sample.properties");
+		String baseDir = ioConf.getProperty("base-dir");
+		String inputDir = ioConf.getProperty("input-dir");
+		String outputDir = ioConf.getProperty("output-dir-mut-schemata");
 
 		CombinedTypeSolver typeSolvers = new CombinedTypeSolver();
 		typeSolvers.add(new ReflectionTypeSolver());
-		typeSolvers.add(new JavaParserTypeSolver(baseDir + "systems/original/.../src/main/java")); //TODO change path
-//		try {
-//			typeSolvers.add(new JarTypeSolver(rootDir + "systems/.../?.jar")); //TODO change paths
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
+		typeSolvers.add(new JavaParserTypeSolver(baseDir + inputDir));
 
+		String jarsStr = ioConf.getProperty("dependent-jars-full-path", "");
+		if (!jarsStr.isEmpty()) {
+			String[] jars = jarsStr.split(",");
+			try {
+				for (String jar : jars) {
+					typeSolvers.add(new JarTypeSolver(jar));
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		MutationStrategy mutStrategy = new AllBinaryExprMutationStrategy();
+//		MutationStrategy mutStrategy = new OneBinaryExprPerStatementMutationStrategy(); 
+//		MutationStrategy mutStrategy = new OneNameExprPerStatementMutStr();
+
+//		MutantsGenerator mg = new MutGenClassic();
 		MutantsGenerator mg = new MutantsGenerator();
 		mg.setAllPossibleMutationsPerSpot(true);
-//		mg.setMutateLoopConditions(false);
-//		mg.setMutationRate(0.5);
+		mg.setMutateLoopConditions(false);
+		mg.setMutationRate(1d);
 		mg.setMutStrategy(mutStrategy);
 		mg.setTypeSolver(typeSolvers);
+		
+		mg.mutatePackageOrDirectory(baseDir + inputDir, baseDir + outputDir);
 
-		mg.mutatePackageOrDirectory(baseDir + "systems/original/.../src/main/java", //TODO change path	
-				baseDir + "systems/mutated/main/v04"); //TODO change path
-//		mutateOneClass(mg);
+//		testMutateOneClass(mg);
 	}
 
 	@Deprecated
-	public static void mutateOneClass(MutantsGenerator mg) {
+	public static void testMutateOneClass(MutantsGenerator mg) {
 
 //		testMutatingJavaOperators();
 
-//		CompilationUnit original = tryMutationFromSample();
-		CompilationUnit original = tryMutationFromFile();
+		CompilationUnit original = CompilationUnitSamples.createCompilationUnit();
 
 		//MUTANTS GENERATION
 		CompilationUnit mutated = mg.generateMutants(original);
@@ -60,23 +75,6 @@ public class Main {
 		System.out.println();
 		System.out.println(" *** ORIGINAL ***\n\n" + original);
 		System.out.println("\n *** MUTATED ***\n\n" + mutated);
-
-		File outputDirectory = new File(baseDir + "systems/mutated");
-		IO.writeCompilationUnit(mutated, outputDirectory); //, inputFile.getName()
-	}
-
-	@Deprecated
-	private static CompilationUnit tryMutationFromSample() {
-
-		return CompilationUnitSamples.createCompilationUnit();
-//		return CompilationUnitSamples.createCompilationUnit2();
-	}
-
-	@Deprecated
-	private static CompilationUnit tryMutationFromFile() {
-		File inputFile = new File(baseDir + "systems/original/.../.java");
-
-		return IO.getCompilationUnitFromFile(inputFile);
 	}
 
 	public static void testMutatingJavaOperators() {
