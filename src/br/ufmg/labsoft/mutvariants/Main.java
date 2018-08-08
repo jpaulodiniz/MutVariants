@@ -25,12 +25,12 @@ public class Main {
 		//TODO change path and/or properties name
 		Properties ioConf = IO.loadProperties("resources/sample.properties");
 		String baseDir = ioConf.getProperty("base-dir");
-		String inputDir = ioConf.getProperty("input-dir");
-		String outputDir = ioConf.getProperty("output-dir-mut-schemata");
+		String inputDir = baseDir + ioConf.getProperty("input-dir");
+		String outputDir = baseDir + ioConf.getProperty("output-dir-mut-schemata");
 
 		CombinedTypeSolver typeSolvers = new CombinedTypeSolver();
 		typeSolvers.add(new ReflectionTypeSolver());
-		typeSolvers.add(new JavaParserTypeSolver(baseDir + inputDir));
+		typeSolvers.add(new JavaParserTypeSolver(inputDir));
 
 		String jarsStr = ioConf.getProperty("dependent-jars-full-path", "");
 		if (!jarsStr.isEmpty()) {
@@ -53,7 +53,7 @@ public class Main {
 		mg.setMutStrategy(mutStrategy);
 		mg.setTypeSolver(typeSolvers);
 		
-		mg.mutatePackageOrDirectory(baseDir + inputDir, baseDir + outputDir);
+		mg.mutatePackageOrDirectory(inputDir, outputDir);
 
 //		testMutateOneClass(mg);
 	}
