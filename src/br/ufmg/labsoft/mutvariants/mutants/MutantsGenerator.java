@@ -258,7 +258,7 @@ public class MutantsGenerator {
 			BinaryExpr mutated = original.clone();
 			mutated.setOperator(op);
 
-			String mutantVariableName = buildMutantVariableName(
+			String mutantVariableName = this.buildMutantVariableName(
 					this.currentClassFQN, 
 					this.mutantsCounterGlobal);
 			
@@ -321,10 +321,11 @@ public class MutantsGenerator {
 
 		long fin = System.currentTimeMillis();
 		
-		System.out.println("\n>>>>> " + this.mutantsCounterGlobal + " mutants seeded (total)");
-		System.out.println(">>>>> in " + countMutatedCompilationUnits + " mutated compilation units");
-		System.out.println(">>>>> in " + (fin - ini) + "ms");
+		System.out.print("\n>>>>> " + this.mutantsCounterGlobal + " mutants seeded");
+		System.out.print(" in " + countMutatedCompilationUnits + " mutated compilation units");
+		System.out.println(", in " + (fin - ini) + "ms");
 		
 		System.out.println(">>>>> Mutants Mapping:\n" + this.mutantsPerClass);
+		IO.saveMutantsCatalog(outputPath, Constants.MUT_CATALOG_FILE_NAME, this.mutantsPerClass);
 	}
 }

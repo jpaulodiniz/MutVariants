@@ -21,4 +21,9 @@ public class Constants {
 	 * fully qualified name of VarexJ conditional annotation
 	 */
 	public static final String VAREXJ_CONDITIONAL_FQN = "gov.nasa.jpf.annotation.Conditional";
+	
+	/**
+	 * name of the mutants generated catalog file
+	 */
+	public static final String MUT_CATALOG_FILE_NAME = "mutants-catalog.txt";
 }

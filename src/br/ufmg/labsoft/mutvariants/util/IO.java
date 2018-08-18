@@ -1,5 +1,6 @@
 package br.ufmg.labsoft.mutvariants.util;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -7,6 +8,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 import com.github.javaparser.JavaParser;
@@ -124,5 +127,25 @@ public class IO {
 		}
 
 		return null;
+	}
+
+	public static void saveMutantsCatalog(String outputPath, String fileName,
+			Map<String, List<String>> mutantsPerClass) {
+		
+		try {
+			FileWriter fw = new FileWriter(new File(outputPath, fileName));
+			BufferedWriter bw = new BufferedWriter(fw);
+			
+			for (Entry<String, List<String>> pair :  mutantsPerClass.entrySet()) {
+				bw.write(pair.getKey());
+				bw.write(":");
+				bw.write(pair.getValue().toString());
+				bw.newLine();
+			}
+//			bw.write(mutantsPerClass.toString());
+			bw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
