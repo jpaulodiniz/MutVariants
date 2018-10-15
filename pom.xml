@@ -8,7 +8,7 @@
     <dependency>
       <groupId>com.github.javaparser</groupId>
       <artifactId>javaparser-symbol-solver-core</artifactId>
-      <version>3.6.7</version>
+      <version>3.6.25</version>
     </dependency>
   </dependencies>
 
