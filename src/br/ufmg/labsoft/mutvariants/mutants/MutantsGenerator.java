@@ -6,7 +6,6 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
@@ -15,12 +14,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.BinaryExpr;
-import com.github.javaparser.ast.expr.BinaryExpr.Operator;
 import com.github.javaparser.ast.expr.BooleanLiteralExpr;
-import com.github.javaparser.ast.expr.ConditionalExpr;
-import com.github.javaparser.ast.expr.EnclosedExpr;
-import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.PrimitiveType.Primitive;
 import com.github.javaparser.resolution.types.ResolvedType;
@@ -35,10 +29,11 @@ import br.ufmg.labsoft.mutvariants.util.TypeUtil;
 
 /*
  * TODO(s)
- * - don't mutate main methods
  * - start mutantCounter with 1 (current is 0)
- * - seek for interfaces with default methods and check whether there was something to mutate
  * - verify if Java bitwise operators could be mutated
+ * - seek for interfaces with default methods and check whether there was something to mutate
+ * - don't mutate main methods
+ * - don't mutate emum
  * - [OK] don't mutate Exception classes
  * - [OK] implement global mutantsCounter
  * - [OK] preserve package directory structure when mutate whole packages
@@ -188,7 +183,23 @@ public class MutantsGenerator {
 		return original;
 	}
 
-	private String buildMutantVariableName(String classFQN, long mutSeq) {
+	/**
+	 * 
+	 * @return
+	 */
+	public String nextMutantVariableName() {
+
+		String mutantVariable = buildMutantVariableName(this.currentClassFQN, this.mutantsCounterGlobal++);
+		
+		if (this.mutantsPerClass.get(this.currentClassFQN) == null) {
+			this.mutantsPerClass.put(this.currentClassFQN, new ArrayList<>());
+		}
+		this.mutantsPerClass.get(this.currentClassFQN).add(mutantVariable.toString());
+		
+		return mutantVariable;
+	}
+
+	private static String buildMutantVariableName(String classFQN, long mutSeq) {
 
 		StringBuilder mutantName = new StringBuilder();
 //		mutantName.append(Constants.MUTANT_VARIABLE_PREFIX1);
@@ -196,115 +207,7 @@ public class MutantsGenerator {
 		mutantName.append(Constants.MUTANT_VARIABLE_PREFIX2);
 		mutantName.append(mutSeq);
 		
-		if (this.mutantsPerClass.get(classFQN) == null) {
-			this.mutantsPerClass.put(classFQN, new ArrayList<>());
-		}
-		this.mutantsPerClass.get(classFQN).add(mutantName.toString());
-		
 		return mutantName.toString();
-	}
-
-	/**
-	 * 
-	 * @param original operand1 ORIGINAL operand2
-	 * @return (_PREFIX_mut# ? (operand1 MUTATION1 operand2) : (operand1 ORIGINAL operand2)) or 
-	 * (_PREFIX_mut## ? (operand1 MUTATION2 operand2) : (_PREFIX_mut# ? (operand1 MUTATION1 operand2) : (operand1 ORIGINAL operand2)))
-	 * @throws Exception
-	 */
-	public EnclosedExpr mutateBinaryExpression(BinaryExpr original) { //throws RuntimeException, boolean allAvailableMutants
-
-		EnumSet<Operator> mOperators = this.isAllPossibleMutationsPerChangePoint() ? 
-				availableOperatorsForMutation(original.getOperator(), false) :
-				EnumSet.of(operatorForMutation(original.getOperator(), false) ); 
-				
-		if (mOperators == null || mOperators.isEmpty()) return null; //<<, >>, &, |, ... TODO review 
-
-		Expression mutantExpressionTemp = original.clone();
-
-		for (Operator op : mOperators) {
-			
-			if (Math.random() > this.getMutationRate()) continue;
-
-			BinaryExpr mutated = original.clone();
-			mutated.setOperator(op);
-
-			String mutantVariableName = this.buildMutantVariableName(
-					this.currentClassFQN, 
-					this.mutantsCounterGlobal);
-			
-			++this.mutantsCounterGlobal;
-
-			mutantExpressionTemp = new ConditionalExpr(
-					new NameExpr(mutantVariableName), 
-					new EnclosedExpr(mutated),
-					new EnclosedExpr(mutantExpressionTemp.clone()));
-		}
-
-		return new EnclosedExpr(mutantExpressionTemp);
-	}
-
-	/**
-	 * Checks whether a binary expression is a change point for mutation in two cases:
-	 * 1) operator + performing a sum or string concatenation 
-	 * 2) (in)equality operators: == or != doing comparison between numbers or objects  
-	 * @param be
-	 * @return true if + adds two numbers OR == and != compares two numbers
-	 */
-	public boolean isChangePoint(BinaryExpr be) {
-		
-		//boolean equalityOperatorNoNumbers = false; //TODO review
-
-		//avoiding mutating String concatenator operator +
-		if (BinaryExpr.Operator.PLUS.equals(be.getOperator())) {
-
-			ResolvedType type = JavaParserFacade.get(this.typeSolver).getType(be);
-			if (TypeUtil.isString(type)) {
-//				throw new RuntimeException("can't 1: " + original);
-				return false;
-			}
-		}
-		//checking == or != with numbers
-		else if (JavaBinaryOperatorsGroups.equalityOperators.contains(be.getOperator())) {
-
-			if (be.getRight().toString().equals("null") || be.getLeft().toString().equals("null")) {
-//				equalityOperatorNoNumbers = true;
-				return false;
-			}
-			
-			ResolvedType typeLeft = JavaParserFacade.get(this.typeSolver).getType(be.getLeft());
-			ResolvedType typeRight = JavaParserFacade.get(this.typeSolver).getType(be.getRight());
-
-			//ensures mutations on expressions like var.size() == 4
-			if (!TypeUtil.isNumberPrimitiveOrWrapper(typeLeft) || !TypeUtil.isNumberPrimitiveOrWrapper(typeRight)) {
-//				equalityOperatorNoNumbers = true;
-//				throw new RuntimeException("can't 2: " + original);
-				return false;
-			}
-		}
-		
-		return true;
-	}
-	
-	public static Operator operatorForMutation(Operator original, boolean onlyEqualityOperators) {
-
-		EnumSet<Operator> tempEnumSet = availableOperatorsForMutation(original, onlyEqualityOperators);
-
-		Operator[] tempArray = new Operator[tempEnumSet.size()];
-		tempEnumSet.toArray(tempArray);
-
-		int index = new Random().nextInt(tempArray.length);
-		return tempArray[index];
-	}
-
-	public static EnumSet<Operator> availableOperatorsForMutation(Operator original, boolean onlyEqualityOperators) {
-
-		EnumSet<Operator> tempEnumSet = JavaBinaryOperatorsGroups.belongingGroup(original, onlyEqualityOperators);
-		
-		if (tempEnumSet == null)
-			return null;
-
-		tempEnumSet.remove(original);
-		return tempEnumSet;
 	}
 
 	/**

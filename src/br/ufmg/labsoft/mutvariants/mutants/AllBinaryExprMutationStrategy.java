@@ -1,8 +1,14 @@
 package br.ufmg.labsoft.mutvariants.mutants;
 
+import java.util.EnumSet;
+
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.BinaryExpr;
+import com.github.javaparser.ast.expr.ConditionalExpr;
+import com.github.javaparser.ast.expr.EnclosedExpr;
 import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.expr.BinaryExpr.Operator;
 import com.github.javaparser.ast.stmt.DoStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.WhileStmt;
@@ -13,9 +19,14 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
  * @author jpaulo
  *
  */
-public class AllBinaryExprMutationStrategy implements MutationStrategy {
-
-	private class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
+public class AllBinaryExprMutationStrategy extends BinaryExprMutationStrategy {
+	
+	/**
+	 * 
+	 * @author jpaulo
+	 *
+	 */
+	protected class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 		
 		@Override
 		public void visit(ForStmt stmt, MutantsGenerator mGen) {
@@ -50,11 +61,11 @@ public class AllBinaryExprMutationStrategy implements MutationStrategy {
 		@Override
 		public void visit(BinaryExpr be, MutantsGenerator mGen) {
 			
-			boolean isChangePoint = mGen.isChangePoint(be);
+			boolean isChangePoint = isChangePoint(be, mGen);
 			super.visit(be, mGen);
 			
 			if (isChangePoint) {
-				Expression mutatedExpr = mGen.mutateBinaryExpression(be);
+				Expression mutatedExpr = AllBinaryExprMutationStrategy.this.mutateBinaryExpression(be, mGen);
 				if (mutatedExpr != null) {
 					be.replace(mutatedExpr);
 				}
@@ -63,8 +74,7 @@ public class AllBinaryExprMutationStrategy implements MutationStrategy {
 	};
 
 	/**
-	 * @param original
-	 * @return
+	 * 
 	 */
 	@Override
 	public void generateMutants(ClassOrInterfaceDeclaration mutClass, MutantsGenerator mutGen) {
@@ -72,4 +82,5 @@ public class AllBinaryExprMutationStrategy implements MutationStrategy {
 		MutationVisitor mutVisitor = new MutationVisitor();
 		mutClass.accept(mutVisitor, mutGen);		
 	}
+
 }

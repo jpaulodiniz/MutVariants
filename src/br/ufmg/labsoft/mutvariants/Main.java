@@ -1,6 +1,5 @@
 package br.ufmg.labsoft.mutvariants;
 
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.Properties;
@@ -13,6 +12,7 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeS
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 
 import br.ufmg.labsoft.mutvariants.mutants.AllBinaryExprMutationStrategy;
+import br.ufmg.labsoft.mutvariants.mutants.BinaryExprMutationStrategy;
 import br.ufmg.labsoft.mutvariants.mutants.MutantsGenerator;
 import br.ufmg.labsoft.mutvariants.mutants.MutationStrategy;
 import br.ufmg.labsoft.mutvariants.util.CompilationUnitSamples;
@@ -81,7 +81,7 @@ public class Main {
 			System.out.println();
 			for (int i = 0; i < 3; ++i) {
 				try {
-					System.out.println(op + " into " + MutantsGenerator.operatorForMutation(op, false));
+					System.out.println(op + " into " + BinaryExprMutationStrategy.operatorForMutation(op, false));
 				} catch (Exception e) {
 					System.err.println(e.getMessage());
 					continue main_loop;

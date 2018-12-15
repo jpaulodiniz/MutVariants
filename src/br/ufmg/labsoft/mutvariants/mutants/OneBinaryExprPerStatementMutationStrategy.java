@@ -6,7 +6,6 @@ import java.util.List;
 
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.expr.BinaryExpr;
-import com.github.javaparser.ast.expr.EnclosedExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.stmt.DoStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
@@ -20,7 +19,7 @@ import com.github.javaparser.ast.stmt.WhileStmt;
  * @author jpaulo
  *
  */
-public class OneBinaryExprPerStatementMutationStrategy implements MutationStrategy {
+public class OneBinaryExprPerStatementMutationStrategy extends BinaryExprMutationStrategy {
 
 	/**
 	 * @param original
@@ -98,7 +97,7 @@ public class OneBinaryExprPerStatementMutationStrategy implements MutationStrate
 			}
 
 			for (BinaryExpr originalExpr : binaryExpressions) {
-				EnclosedExpr mutatedExpr = mGen.mutateBinaryExpression(originalExpr);
+				Expression mutatedExpr = this.mutateBinaryExpression(originalExpr, mGen);
 				if (mutatedExpr != null) {
 					return originalExpr.replace(mutatedExpr);
 				}
@@ -107,5 +106,4 @@ public class OneBinaryExprPerStatementMutationStrategy implements MutationStrate
 
 		return false;
 	}
-
 }
