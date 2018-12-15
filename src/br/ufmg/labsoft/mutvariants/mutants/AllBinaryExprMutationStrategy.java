@@ -49,11 +49,15 @@ public class AllBinaryExprMutationStrategy implements MutationStrategy {
 
 		@Override
 		public void visit(BinaryExpr be, MutantsGenerator mGen) {
+			
+			boolean isChangePoint = mGen.isChangePoint(be);
 			super.visit(be, mGen);
-
-			Expression mutatedExpr = mGen.mutateBinaryExpression(be);
-			if (mutatedExpr != null) {
-				be.replace(mutatedExpr);
+			
+			if (isChangePoint) {
+				Expression mutatedExpr = mGen.mutateBinaryExpression(be);
+				if (mutatedExpr != null) {
+					be.replace(mutatedExpr);
+				}
 			}
 		}
 	};

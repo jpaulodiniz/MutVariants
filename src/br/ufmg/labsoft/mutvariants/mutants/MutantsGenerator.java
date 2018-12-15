@@ -213,41 +213,11 @@ public class MutantsGenerator {
 	 */
 	public EnclosedExpr mutateBinaryExpression(BinaryExpr original) { //throws RuntimeException, boolean allAvailableMutants
 
-//		boolean equalityOperatorNoNumbers = false; //TODO review
-
-		//avoiding mutating String concatenator operator +
-		if (BinaryExpr.Operator.PLUS.equals(original.getOperator())) {
-
-			ResolvedType type = JavaParserFacade.get(this.typeSolver).getType(original);
-			if (TypeUtil.isString(type)) {
-//				throw new RuntimeException("can't 1: " + original);
-				return null;
-			}
-		}
-		//checking == or != with numbers
-		else if (JavaBinaryOperatorsGroups.equalityOperators.contains(original.getOperator())) {
-
-			if (original.getRight().toString().equals("null") || original.getLeft().toString().equals("null")) {
-//				equalityOperatorNoNumbers = true;
-				return null;
-			}
-			
-			ResolvedType typeLeft = JavaParserFacade.get(this.typeSolver).getType(original.getLeft());
-			ResolvedType typeRight = JavaParserFacade.get(this.typeSolver).getType(original.getRight());
-
-			//ensures mutations on expressions like var.size() == 4
-			if (!TypeUtil.isNumberPrimitiveOrWrapper(typeLeft) || !TypeUtil.isNumberPrimitiveOrWrapper(typeRight)) {
-//				equalityOperatorNoNumbers = true;
-//				throw new RuntimeException("can't 2: " + original);
-				return null;
-			}
-		}
-
 		EnumSet<Operator> mOperators = this.isAllPossibleMutationsPerChangePoint() ? 
 				availableOperatorsForMutation(original.getOperator(), false) :
 				EnumSet.of(operatorForMutation(original.getOperator(), false) ); 
 				
-		if (mOperators == null || mOperators.isEmpty()) return null;
+		if (mOperators == null || mOperators.isEmpty()) return null; //<<, >>, &, |, ... TODO review 
 
 		Expression mutantExpressionTemp = original.clone();
 
@@ -271,6 +241,48 @@ public class MutantsGenerator {
 		}
 
 		return new EnclosedExpr(mutantExpressionTemp);
+	}
+
+	/**
+	 * Checks whether a binary expression is a change point for mutation in two cases:
+	 * 1) operator + performing a sum or string concatenation 
+	 * 2) (in)equality operators: == or != doing comparison between numbers or objects  
+	 * @param be
+	 * @return true if + adds two numbers OR == and != compares two numbers
+	 */
+	public boolean isChangePoint(BinaryExpr be) {
+		
+		//boolean equalityOperatorNoNumbers = false; //TODO review
+
+		//avoiding mutating String concatenator operator +
+		if (BinaryExpr.Operator.PLUS.equals(be.getOperator())) {
+
+			ResolvedType type = JavaParserFacade.get(this.typeSolver).getType(be);
+			if (TypeUtil.isString(type)) {
+//				throw new RuntimeException("can't 1: " + original);
+				return false;
+			}
+		}
+		//checking == or != with numbers
+		else if (JavaBinaryOperatorsGroups.equalityOperators.contains(be.getOperator())) {
+
+			if (be.getRight().toString().equals("null") || be.getLeft().toString().equals("null")) {
+//				equalityOperatorNoNumbers = true;
+				return false;
+			}
+			
+			ResolvedType typeLeft = JavaParserFacade.get(this.typeSolver).getType(be.getLeft());
+			ResolvedType typeRight = JavaParserFacade.get(this.typeSolver).getType(be.getRight());
+
+			//ensures mutations on expressions like var.size() == 4
+			if (!TypeUtil.isNumberPrimitiveOrWrapper(typeLeft) || !TypeUtil.isNumberPrimitiveOrWrapper(typeRight)) {
+//				equalityOperatorNoNumbers = true;
+//				throw new RuntimeException("can't 2: " + original);
+				return false;
+			}
+		}
+		
+		return true;
 	}
 	
 	public static Operator operatorForMutation(Operator original, boolean onlyEqualityOperators) {
