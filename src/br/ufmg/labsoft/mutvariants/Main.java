@@ -47,7 +47,7 @@ public class Main {
 		MutationStrategy mutStrategy = new AllBinaryExprMutationStrategy();
 
 		MutantsGenerator mg = new MutantsGenerator();
-		mg.setAllPossibleMutationsPerSpot(true);
+		mg.setAllPossibleMutationsPerChangePoint(true);
 		mg.setMutateLoopConditions(false);
 		mg.setMutationRate(1d);
 		mg.setMutStrategy(mutStrategy);

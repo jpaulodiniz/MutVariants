@@ -55,10 +55,10 @@ public class MutantsGenerator {
 	private long mutantsCounterGlobal; //helper field
 
 	/**
-	 * generates all possible mutants per spot
+	 * generates all possible mutants per change point
 	 * E.g.: for a + b expression, all available mutations -, *, / and %
 	 */
-	private boolean allPossibleMutationsPerSpot = false;
+	private boolean allPossibleMutationsPerChangePoint = false;
 	private boolean mutateLoopConditions = false;
 	private double mutationRate = 1d; 
 	private MutationStrategy mutStrategy;
@@ -74,8 +74,12 @@ public class MutantsGenerator {
 		this.typeSolver = typeSolver;
 	}
 
-	public boolean getAllPossibleMutationsPerSpot() {
-		return allPossibleMutationsPerSpot;
+	public boolean isAllPossibleMutationsPerChangePoint() {
+		return allPossibleMutationsPerChangePoint;
+	}
+
+	public void setAllPossibleMutationsPerChangePoint(boolean allPossibleMutationsPerChangePoint) {
+		this.allPossibleMutationsPerChangePoint = allPossibleMutationsPerChangePoint;
 	}
 
 	public boolean getMutateLoopConditions() {
@@ -84,10 +88,6 @@ public class MutantsGenerator {
 
 	public void setMutateLoopConditions(boolean mutateLoopConditions) {
 		this.mutateLoopConditions = mutateLoopConditions;
-	}
-
-	public void setAllPossibleMutationsPerSpot(boolean allPossibleMutationsPerSpot) {
-		this.allPossibleMutationsPerSpot = allPossibleMutationsPerSpot;
 	}
 
 	public double getMutationRate() {
@@ -243,7 +243,7 @@ public class MutantsGenerator {
 			}
 		}
 
-		EnumSet<Operator> mOperators = this.getAllPossibleMutationsPerSpot() ? 
+		EnumSet<Operator> mOperators = this.isAllPossibleMutationsPerChangePoint() ? 
 				availableOperatorsForMutation(original.getOperator(), false) :
 				EnumSet.of(operatorForMutation(original.getOperator(), false) ); 
 				
