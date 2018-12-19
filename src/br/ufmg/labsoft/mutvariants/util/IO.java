@@ -16,6 +16,8 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.EnumDeclaration;
+import com.github.javaparser.ast.body.TypeDeclaration;
 
 public class IO {
 
@@ -59,9 +61,10 @@ public class IO {
 	 */
 	public static boolean writeCompilationUnit(CompilationUnit compUn, File outputDirectory) {
 
-		List<ClassOrInterfaceDeclaration> list = compUn.findAll(ClassOrInterfaceDeclaration.class);
+		@SuppressWarnings("rawtypes")
+		List<TypeDeclaration> list = compUn.findAll(TypeDeclaration.class); //AnnotationDeclaration, ClassOrInterfaceDeclaration, EnumDeclaration
 		String className = null;
-
+		
 		if (list.size() == 1) { //a CompilationUnit may have only one class which can even be non public
 			className = list.get(0).getNameAsString();
 		}

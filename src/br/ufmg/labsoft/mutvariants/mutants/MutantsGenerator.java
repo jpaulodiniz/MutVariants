@@ -28,8 +28,8 @@ import br.ufmg.labsoft.mutvariants.util.IO;
  * - verify if Java bitwise operators could be mutated
  * - seek for interfaces with default methods and check whether there was something to mutate
  * - don't mutate main methods
- * - don't mutate emum
- * - [OK] don't mutate Exception classes
+ * - [+-] don't mutate Exception classes
+ * - [OK] don't mutate, but handle enum when writing
  * - [OK] implement global mutantsCounter
  * - [OK] preserve package directory structure when mutate whole packages
  */
