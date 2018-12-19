@@ -26,4 +26,9 @@ public class Constants {
 	 * name of the mutants generated catalog file
 	 */
 	public static final String MUT_CATALOG_FILE_NAME = "mutants-catalog.txt";
+
+	/**
+	 * FQN class containing methods for mutation operators in binary expressions
+	 */
+	public static final String MUTANT_SCHEMATA_LIB = "br.ufmg.labsoft.mutvariants.schematalib.SchemataLibMethods";
 }

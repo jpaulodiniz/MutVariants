@@ -12,6 +12,7 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeS
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 
 import br.ufmg.labsoft.mutvariants.mutants.AllBinaryExprMutationStrategy;
+import br.ufmg.labsoft.mutvariants.mutants.AllBinaryExprSchemataLibMutationStrategy;
 import br.ufmg.labsoft.mutvariants.mutants.BinaryExprMutationStrategy;
 import br.ufmg.labsoft.mutvariants.mutants.MutantsGenerator;
 import br.ufmg.labsoft.mutvariants.mutants.MutationStrategy;
@@ -44,7 +45,8 @@ public class Main {
 			}
 		}
 
-		MutationStrategy mutStrategy = new AllBinaryExprMutationStrategy();
+//		MutationStrategy mutStrategy = new AllBinaryExprMutationStrategy();
+		MutationStrategy mutStrategy = new AllBinaryExprSchemataLibMutationStrategy();
 
 		MutantsGenerator mg = new MutantsGenerator();
 		mg.setAllPossibleMutationsPerChangePoint(true);

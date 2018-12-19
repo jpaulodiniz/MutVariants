@@ -13,19 +13,14 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.BooleanLiteralExpr;
 import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.PrimitiveType.Primitive;
-import com.github.javaparser.resolution.types.ResolvedType;
-import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 
 import br.ufmg.labsoft.mutvariants.util.Constants;
 import br.ufmg.labsoft.mutvariants.util.IO;
-import br.ufmg.labsoft.mutvariants.util.JavaBinaryOperatorsGroups;
-import br.ufmg.labsoft.mutvariants.util.TypeUtil;
 
 /*
  * TODO(s)
@@ -172,8 +167,11 @@ public class MutantsGenerator {
 
 		if (mutantsCounterPerCompUn > 0) {
 			//add import Conditional
-//			mcu.addImport(new ImportDeclaration(new Name(Constants.VAREXJ_CONDITIONAL_FQN), false, false));
 			mcu.addImport(Constants.VAREXJ_CONDITIONAL_FQN);
+
+			if (this.mutStrategy instanceof AllBinaryExprSchemataLibMutationStrategy) {
+				mcu.addImport(Constants.MUTANT_SCHEMATA_LIB, true, true);
+			}
 
 			System.out.println(">>>> " + mutantsCounterPerCompUn + " mutants seeded (in Comp. Unit).");
 

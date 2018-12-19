@@ -101,6 +101,7 @@ public abstract class BinaryExprMutationStrategy implements MutationStrategy {
 	/**
 	 * 
 	 * @param original operand1 ORIGINAL operand2
+	 * @param mGen
 	 * @return (_PREFIX_mut# ? (operand1 MUTATION1 operand2) : (operand1 ORIGINAL operand2)) or 
 	 * (_PREFIX_mut## ? (operand1 MUTATION2 operand2) : (_PREFIX_mut# ? (operand1 MUTATION1 operand2) : (operand1 ORIGINAL operand2)))
 	 * @throws Exception
