@@ -39,110 +39,110 @@ public class SchemataLibMethods {
 //multiply
 	public static int AOR_multiply(int left, int right, boolean... mutants) {
 
-		return (mutants[3] ? (left % right) : (mutants[2] ? (left / right) : (mutants[1] ? (left + right) : (mutants[0] ? (left - right) : (left * right)))));
+		return (mutants[3] ? (left % right) : (mutants[2] ? (left / right) : (mutants[1] ? (left - right) : (mutants[0] ? (left + right) : (left * right)))));
 	}
 
 	public static long AOR_multiply(long left, long right, boolean... mutants) {
 
-		return (mutants[3] ? (left % right) : (mutants[2] ? (left / right) : (mutants[1] ? (left + right) : (mutants[0] ? (left - right) : (left * right)))));
+		return (mutants[3] ? (left % right) : (mutants[2] ? (left / right) : (mutants[1] ? (left - right) : (mutants[0] ? (left + right) : (left * right)))));
 	}
 
 	public static double AOR_multiply(double left, double right, boolean... mutants) {
 
-		return (mutants[3] ? (left % right) : (mutants[2] ? (left / right) : (mutants[1] ? (left + right) : (mutants[0] ? (left - right) : (left * right)))));
+		return (mutants[3] ? (left % right) : (mutants[2] ? (left / right) : (mutants[1] ? (left - right) : (mutants[0] ? (left + right) : (left * right)))));
 	}
 
 //divide
 	public static int AOR_divide(int left, int right, boolean... mutants) {
 
-		return (mutants[3] ? (left % right) : (mutants[2] ? (left + right) : (mutants[1] ? (left * right) : (mutants[0] ? (left - right) : (left / right)))));
+		return (mutants[3] ? (left % right) : (mutants[2] ? (left * right) : (mutants[1] ? (left - right) : (mutants[0] ? (left + right) : (left / right)))));
 	}
 
 	public static long AOR_divide(long left, long right, boolean... mutants) {
 
-		return (mutants[3] ? (left % right) : (mutants[2] ? (left + right) : (mutants[1] ? (left * right) : (mutants[0] ? (left - right) : (left / right)))));
+		return (mutants[3] ? (left % right) : (mutants[2] ? (left * right) : (mutants[1] ? (left - right) : (mutants[0] ? (left + right) : (left / right)))));
 	}
 
 	public static double AOR_divide(double left, double right, boolean... mutants) {
 
-		return (mutants[3] ? (left % right) : (mutants[2] ? (left + right) : (mutants[1] ? (left * right) : (mutants[0] ? (left - right) : (left / right)))));
+		return (mutants[3] ? (left % right) : (mutants[2] ? (left * right) : (mutants[1] ? (left - right) : (mutants[0] ? (left + right) : (left / right)))));
 	}
 
 //remainder
 	public static int AOR_remainder(int left, int right, boolean... mutants) {
 
-		return (mutants[3] ? (left + right) : (mutants[2] ? (left / right) : (mutants[1] ? (left * right) : (mutants[0] ? (left - right) : (left % right)))));
+		return (mutants[3] ? (left / right) : (mutants[2] ? (left * right) : (mutants[1] ? (left - right) : (mutants[0] ? (left + right) : (left % right)))));
 	}
 
 	public static long AOR_remainder(long left, long right, boolean... mutants) {
 
-		return (mutants[3] ? (left + right) : (mutants[2] ? (left / right) : (mutants[1] ? (left * right) : (mutants[0] ? (left - right) : (left % right)))));
+		return (mutants[3] ? (left / right) : (mutants[2] ? (left * right) : (mutants[1] ? (left - right) : (mutants[0] ? (left + right) : (left % right)))));
 	}
 
 	public static double AOR_remainder(double left, double right, boolean... mutants) {
 
-		return (mutants[3] ? (left + right) : (mutants[2] ? (left / right) : (mutants[1] ? (left * right) : (mutants[0] ? (left - right) : (left % right)))));
+		return (mutants[3] ? (left / right) : (mutants[2] ? (left * right) : (mutants[1] ? (left - right) : (mutants[0] ? (left + right) : (left % right)))));
 	}
 
 //ROR
 	public static boolean ROR_equals(int left, int right, boolean... mutants) {
 
-		return (mutants[4] ? (left <= right) : (mutants[3] ? (left >= right) : (mutants[2] ? (left < right) : (mutants[1] ? (left > right) : (mutants[0] ? (left != right) : (left == right))))));
+		return (mutants[4] ? (left >= right) : (mutants[3] ? (left <= right) : (mutants[2] ? (left > right) : (mutants[1] ? (left < right) : (mutants[0] ? (left != right) : (left == right))))));
 	}
 
 	public static boolean ROR_equals(double left, double right, boolean... mutants) {
 
-		return (mutants[4] ? (left <= right) : (mutants[3] ? (left >= right) : (mutants[2] ? (left < right) : (mutants[1] ? (left > right) : (mutants[0] ? (left != right) : (left == right))))));
+		return (mutants[4] ? (left >= right) : (mutants[3] ? (left <= right) : (mutants[2] ? (left > right) : (mutants[1] ? (left < right) : (mutants[0] ? (left != right) : (left == right))))));
 	}
 
 	public static boolean ROR_not_equals(int left, int right, boolean... mutants) {
 
-		return (mutants[4] ? (left <= right) : (mutants[3] ? (left >= right) : (mutants[2] ? (left < right) : (mutants[1] ? (left > right) : (mutants[0] ? (left == right) : (left != right))))));
+		return (mutants[4] ? (left >= right) : (mutants[3] ? (left <= right) : (mutants[2] ? (left > right) : (mutants[1] ? (left < right) : (mutants[0] ? (left == right) : (left != right))))));
 	}
 
 	public static boolean ROR_not_equals(double left, double right, boolean... mutants) {
 
-		return (mutants[4] ? (left <= right) : (mutants[3] ? (left >= right) : (mutants[2] ? (left < right) : (mutants[1] ? (left > right) : (mutants[0] ? (left == right) : (left != right))))));
-	}
-
-	public static boolean ROR_greater(int left, int right, boolean... mutants) {
-
-		return (mutants[4] ? (left <= right) : (mutants[3] ? (left >= right) : (mutants[2] ? (left < right) : (mutants[1] ? (left == right) : (mutants[0] ? (left != right) : (left > right))))));
-	}
-
-	public static boolean ROR_greater(double left, double right, boolean... mutants) {
-
-		return (mutants[4] ? (left <= right) : (mutants[3] ? (left >= right) : (mutants[2] ? (left < right) : (mutants[1] ? (left == right) : (mutants[0] ? (left != right) : (left > right))))));
+		return (mutants[4] ? (left >= right) : (mutants[3] ? (left <= right) : (mutants[2] ? (left > right) : (mutants[1] ? (left < right) : (mutants[0] ? (left == right) : (left != right))))));
 	}
 
 	public static boolean ROR_less(int left, int right, boolean... mutants) {
 
-		return (mutants[4] ? (left <= right) : (mutants[3] ? (left >= right) : (mutants[2] ? (left == right) : (mutants[1] ? (left > right) : (mutants[0] ? (left != right) : (left < right))))));
+		return (mutants[4] ? (left >= right) : (mutants[3] ? (left <= right) : (mutants[2] ? (left > right) : (mutants[1] ? (left != right) : (mutants[0] ? (left == right) : (left < right))))));
 	}
 
 	public static boolean ROR_less(double left, double right, boolean... mutants) {
 
-		return (mutants[4] ? (left <= right) : (mutants[3] ? (left >= right) : (mutants[2] ? (left == right) : (mutants[1] ? (left > right) : (mutants[0] ? (left != right) : (left < right))))));
+		return (mutants[4] ? (left >= right) : (mutants[3] ? (left <= right) : (mutants[2] ? (left > right) : (mutants[1] ? (left != right) : (mutants[0] ? (left == right) : (left < right))))));
 	}
 
-	public static boolean ROR_greater_equals(int left, int right, boolean... mutants) {
+	public static boolean ROR_greater(int left, int right, boolean... mutants) {
 
-		return (mutants[4] ? (left <= right) : (mutants[3] ? (left == right) : (mutants[2] ? (left < right) : (mutants[1] ? (left > right) : (mutants[0] ? (left != right) : (left >= right))))));
+		return (mutants[4] ? (left >= right) : (mutants[3] ? (left <= right) : (mutants[2] ? (left < right) : (mutants[1] ? (left != right) : (mutants[0] ? (left == right) : (left > right))))));
 	}
 
-	public static boolean ROR_greater_equals(double left, double right, boolean... mutants) {
+	public static boolean ROR_greater(double left, double right, boolean... mutants) {
 
-		return (mutants[4] ? (left <= right) : (mutants[3] ? (left == right) : (mutants[2] ? (left < right) : (mutants[1] ? (left > right) : (mutants[0] ? (left != right) : (left >= right))))));
+		return (mutants[4] ? (left >= right) : (mutants[3] ? (left <= right) : (mutants[2] ? (left < right) : (mutants[1] ? (left != right) : (mutants[0] ? (left == right) : (left > right))))));
 	}
 
 	public static boolean ROR_less_equals(int left, int right, boolean... mutants) {
 
-		return (mutants[4] ? (left == right) : (mutants[3] ? (left >= right) : (mutants[2] ? (left < right) : (mutants[1] ? (left > right) : (mutants[0] ? (left != right) : (left <= right))))));
+		return (mutants[4] ? (left >= right) : (mutants[3] ? (left > right) : (mutants[2] ? (left < right) : (mutants[1] ? (left != right) : (mutants[0] ? (left == right) : (left <= right))))));
 	}
 
 	public static boolean ROR_less_equals(double left, double right, boolean... mutants) {
 
-		return (mutants[4] ? (left == right) : (mutants[3] ? (left >= right) : (mutants[2] ? (left < right) : (mutants[1] ? (left > right) : (mutants[0] ? (left != right) : (left <= right))))));
+		return (mutants[4] ? (left >= right) : (mutants[3] ? (left > right) : (mutants[2] ? (left < right) : (mutants[1] ? (left != right) : (mutants[0] ? (left == right) : (left <= right))))));
+	}
+
+	public static boolean ROR_greater_equals(int left, int right, boolean... mutants) {
+
+		return (mutants[4] ? (left <= right) : (mutants[3] ? (left > right) : (mutants[2] ? (left < right) : (mutants[1] ? (left != right) : (mutants[0] ? (left == right) : (left >= right))))));
+	}
+
+	public static boolean ROR_greater_equals(double left, double right, boolean... mutants) {
+
+		return (mutants[4] ? (left <= right) : (mutants[3] ? (left > right) : (mutants[2] ? (left < right) : (mutants[1] ? (left != right) : (mutants[0] ? (left == right) : (left >= right))))));
 	}
 
 //LCR
