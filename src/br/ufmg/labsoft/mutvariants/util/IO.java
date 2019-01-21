@@ -179,4 +179,35 @@ public class IO {
 			e.printStackTrace();
 		}
 	}
+
+	/**
+	 * Issue #4
+	 * @param outputPath
+	 * @param fileName
+	 * @param groupsOfMutants
+	 */
+	public static void saveGroupsOfMutants(String outputPath,
+			String fileName, List<List<String>> groupsOfMutants) {
+
+		if (groupsOfMutants == null || groupsOfMutants.isEmpty()) return;
+		
+		try {
+			FileWriter fw = new FileWriter(new File(outputPath, fileName));
+			BufferedWriter bw = new BufferedWriter(fw);
+			
+			for (List<String> mGroup : groupsOfMutants) {
+				bw.write(mGroup.get(0));
+				
+				for (int i=1; i < mGroup.size(); ++i) {
+					bw.write(' ');
+					bw.write(mGroup.get(i));
+				}
+				
+				bw.newLine();
+			}
+			bw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }

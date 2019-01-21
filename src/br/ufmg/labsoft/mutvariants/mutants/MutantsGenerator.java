@@ -41,8 +41,8 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeS
  */
 public class MutantsGenerator {
 
-//	private Map<String, MutantInfo> mutantsCatalog;
 	private List<MutantInfo> mutantsCatalog; //Issue #3
+	private List<List<String>> groupsOfMutants; //Issue #4
 
 	@Deprecated
 	private Map<String, List<String>> mutantsPerClass; //key: class FQN; value: list of mutants
@@ -71,6 +71,7 @@ public class MutantsGenerator {
 		this.typeSolver = typeSolver;
 
 		this.mutantsCatalog = new ArrayList<>();
+		this.groupsOfMutants = new ArrayList<>();
 	}
 
 	public boolean isAllPossibleMutationsPerChangePoint() {
@@ -120,7 +121,15 @@ public class MutantsGenerator {
 
 		this.mutantsCatalog.add(mutantInfo);
 	}
-	
+
+	/**
+	 * Issue #4
+	 */
+	public void addGroupOfMutants(List<String> groupOfMutants) {
+
+		this.groupsOfMutants.add(groupOfMutants);
+	}
+
 	/**
 	 * @param original
 	 * @return
@@ -256,7 +265,8 @@ public class MutantsGenerator {
 		System.out.println(", in " + (fin - ini) + "ms");
 		
 		System.out.println(">>>>> Mutants Mapping:\n" + this.mutantsPerClass);
-		IO.saveMutantsCatalog(outputPath, Constants.MUT_CATALOG_FILE_NAME, this.mutantsCatalog);
 //		IO.saveMutantsCatalog(outputPath, Constants.MUT_CATALOG_FILE_NAME, this.mutantsPerClass);
+		IO.saveMutantsCatalog(outputPath, Constants.MUT_CATALOG_FILE_NAME, this.mutantsCatalog);
+		IO.saveGroupsOfMutants(outputPath, Constants.GROUPS_OF_MUTANTS_FILE_NAME, this.groupsOfMutants);
 	}
 }

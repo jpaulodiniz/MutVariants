@@ -1,6 +1,8 @@
 package br.ufmg.labsoft.mutvariants.mutants;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 
 import br.ufmg.labsoft.mutvariants.entity.MutantInfo;
 import br.ufmg.labsoft.mutvariants.util.JavaBinaryOperatorsGroups;
@@ -96,11 +98,13 @@ public class AllBinaryExprSchemataLibMutationStrategy extends AllBinaryExprMutat
 				availableOperatorsForMutation(original.getOperator(), false);
 
 		if (mOperators == null || mOperators.isEmpty()) return null;
-
+		
+		List<String> groupOfMutants = new ArrayList<>(); //Issue #4
 		NodeList<Expression> mutantsList = new NodeList<>();
 
 		for (Operator op : mOperators) {
 			String mutantVariableName = mGen.nextMutantVariableName();
+			groupOfMutants.add(mutantVariableName);
 			mutantsList.add(new NameExpr(mutantVariableName));
 			
 			//generation mutant information for mutants catalog
@@ -112,6 +116,8 @@ public class AllBinaryExprSchemataLibMutationStrategy extends AllBinaryExprMutat
 			mInfo.setMutatedMethod(mGen.currentMethod);
 			mGen.addMutantInfoToCatalog(mInfo);
 		}
+		
+		mGen.addGroupOfMutants(groupOfMutants);
 
 		NodeList<Expression> arguments = new NodeList<>();
 		arguments.add(original.getLeft().clone());

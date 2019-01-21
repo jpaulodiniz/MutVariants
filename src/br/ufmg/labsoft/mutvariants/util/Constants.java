@@ -28,6 +28,12 @@ public class Constants {
 	public static final String MUT_CATALOG_FILE_NAME = "mutants-catalog.txt";
 
 	/**
+	 * Issue #4
+	 */
+	public static final String GROUPS_OF_MUTANTS_FILE_NAME = "groups-of-mutants.txt";
+
+	/**
+	 * Issue #1
 	 * FQN class containing methods for mutation operators in binary expressions
 	 */
 	public static final String MUTANT_SCHEMATA_LIB = "br.ufmg.labsoft.mutvariants.schematalib.SchemataLibMethods";

@@ -1,20 +1,22 @@
 package br.ufmg.labsoft.mutvariants.mutants;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Random;
-
-import com.github.javaparser.ast.expr.BinaryExpr;
-import com.github.javaparser.ast.expr.BinaryExpr.Operator;
-import com.github.javaparser.resolution.types.ResolvedType;
-import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
-import com.github.javaparser.ast.expr.ConditionalExpr;
-import com.github.javaparser.ast.expr.EnclosedExpr;
-import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.NameExpr;
 
 import br.ufmg.labsoft.mutvariants.entity.MutantInfo;
 import br.ufmg.labsoft.mutvariants.util.JavaBinaryOperatorsGroups;
 import br.ufmg.labsoft.mutvariants.util.TypeUtil;
+
+import com.github.javaparser.ast.expr.BinaryExpr;
+import com.github.javaparser.ast.expr.BinaryExpr.Operator;
+import com.github.javaparser.ast.expr.ConditionalExpr;
+import com.github.javaparser.ast.expr.EnclosedExpr;
+import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.resolution.types.ResolvedType;
+import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
 
 /**
  * 
@@ -114,6 +116,8 @@ public abstract class BinaryExprMutationStrategy implements MutationStrategy {
 				EnumSet.of(operatorForMutation(original.getOperator(), false) ); 
 				
 		if (mOperators == null || mOperators.isEmpty()) return null; //<<, >>, >>>, &, |, ... TODO review 
+		
+		List<String> groupOfMutants = new ArrayList<>(); //Issue #4
 
 		Expression mutantExpressionTemp = original.clone();
 
@@ -125,6 +129,7 @@ public abstract class BinaryExprMutationStrategy implements MutationStrategy {
 			mutated.setOperator(op);
 
 			String mutantVariableName = mGen.nextMutantVariableName();
+			groupOfMutants.add(mutantVariableName);
 
 			//generation mutant information for mutants catalog
 			MutantInfo mInfo = new MutantInfo();
@@ -140,6 +145,8 @@ public abstract class BinaryExprMutationStrategy implements MutationStrategy {
 					new EnclosedExpr(mutated),
 					new EnclosedExpr(mutantExpressionTemp.clone()));
 		}
+		
+		mGen.addGroupOfMutants(groupOfMutants);
 
 		return new EnclosedExpr(mutantExpressionTemp);
 	}
