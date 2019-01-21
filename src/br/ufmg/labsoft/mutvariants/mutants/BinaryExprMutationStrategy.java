@@ -12,6 +12,7 @@ import com.github.javaparser.ast.expr.EnclosedExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.NameExpr;
 
+import br.ufmg.labsoft.mutvariants.entity.MutantInfo;
 import br.ufmg.labsoft.mutvariants.util.JavaBinaryOperatorsGroups;
 import br.ufmg.labsoft.mutvariants.util.TypeUtil;
 
@@ -63,7 +64,7 @@ public abstract class BinaryExprMutationStrategy implements MutationStrategy {
 	 * @param be
 	 * @return true if + adds two numbers OR == and != compares two numbers
 	 */
-	public static boolean isChangePoint(BinaryExpr be, MutantsGenerator mGen) {
+	public boolean isChangePoint(BinaryExpr be, MutantsGenerator mGen) {
 		
 		//boolean equalityOperatorNoNumbers = false; //TODO review
 
@@ -124,6 +125,15 @@ public abstract class BinaryExprMutationStrategy implements MutationStrategy {
 			mutated.setOperator(op);
 
 			String mutantVariableName = mGen.nextMutantVariableName();
+
+			//generation mutant information for mutants catalog
+			MutantInfo mInfo = new MutantInfo();
+			mInfo.setMutantVariableName(mutantVariableName);
+			mInfo.setOriginaBinaryOperator(original.getOperator().asString());
+			mInfo.setMutatedBinaryOperator(op.asString());
+			mInfo.setMutatedClass(mGen.currentClassFQN);
+			mInfo.setMutatedMethod(mGen.currentMethod);
+			mGen.addMutantInfoToCatalog(mInfo);
 
 			mutantExpressionTemp = new ConditionalExpr(
 					new NameExpr(mutantVariableName), 

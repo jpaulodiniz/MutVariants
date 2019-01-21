@@ -12,11 +12,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
+import br.ufmg.labsoft.mutvariants.entity.MutantInfo;
+
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.TypeDeclaration;
 
 public class IO {
@@ -146,6 +146,34 @@ public class IO {
 				bw.newLine();
 			}
 //			bw.write(mutantsPerClass.toString());
+			bw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Issue #3
+	 * @param outputPath
+	 * @param fileName
+	 * @param mutantsCatalog
+	 */
+	public static void saveMutantsCatalog(String outputPath, String fileName,
+			List<MutantInfo> mutantsCatalog) {
+		
+		if (mutantsCatalog == null || mutantsCatalog.isEmpty()) return;
+		
+		try {
+			FileWriter fw = new FileWriter(new File(outputPath, fileName));
+			BufferedWriter bw = new BufferedWriter(fw);
+			
+			bw.write(MutantInfo.infoHeader());
+			bw.newLine();
+			
+			for (MutantInfo mInfo : mutantsCatalog) {
+				bw.write(mInfo.toString());
+				bw.newLine();
+			}
 			bw.close();
 		} catch (IOException e) {
 			e.printStackTrace();

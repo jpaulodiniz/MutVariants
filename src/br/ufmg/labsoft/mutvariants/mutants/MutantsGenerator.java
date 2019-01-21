@@ -7,6 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import br.ufmg.labsoft.mutvariants.entity.MutantInfo;
+import br.ufmg.labsoft.mutvariants.util.Constants;
+import br.ufmg.labsoft.mutvariants.util.IO;
+
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
@@ -18,9 +22,6 @@ import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.PrimitiveType.Primitive;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
-
-import br.ufmg.labsoft.mutvariants.util.Constants;
-import br.ufmg.labsoft.mutvariants.util.IO;
 
 /*
  * TODO(s)
@@ -40,8 +41,14 @@ import br.ufmg.labsoft.mutvariants.util.IO;
  */
 public class MutantsGenerator {
 
+//	private Map<String, MutantInfo> mutantsCatalog;
+	private List<MutantInfo> mutantsCatalog; //Issue #3
+
+	@Deprecated
 	private Map<String, List<String>> mutantsPerClass; //key: class FQN; value: list of mutants
-	private String currentClassFQN; //helper field: current class fully qualified name (FQN)
+	
+	public String currentClassFQN; //helper field: current class fully qualified name (FQN)
+	public String currentMethod; //helper field: Issue #3
 	private long mutantsCounterGlobal; //helper field
 
 	/**
@@ -62,6 +69,8 @@ public class MutantsGenerator {
 		this.mutantsPerClass = new HashMap<>();
 		this.mutStrategy = mutStrategy;
 		this.typeSolver = typeSolver;
+
+		this.mutantsCatalog = new ArrayList<>();
 	}
 
 	public boolean isAllPossibleMutationsPerChangePoint() {
@@ -104,6 +113,14 @@ public class MutantsGenerator {
 		this.typeSolver = typeSolver;
 	}
 
+	/**
+	 * Issue #3
+	 */
+	public void addMutantInfoToCatalog(MutantInfo mutantInfo) {
+
+		this.mutantsCatalog.add(mutantInfo);
+	}
+	
 	/**
 	 * @param original
 	 * @return
@@ -239,6 +256,7 @@ public class MutantsGenerator {
 		System.out.println(", in " + (fin - ini) + "ms");
 		
 		System.out.println(">>>>> Mutants Mapping:\n" + this.mutantsPerClass);
-		IO.saveMutantsCatalog(outputPath, Constants.MUT_CATALOG_FILE_NAME, this.mutantsPerClass);
+		IO.saveMutantsCatalog(outputPath, Constants.MUT_CATALOG_FILE_NAME, this.mutantsCatalog);
+//		IO.saveMutantsCatalog(outputPath, Constants.MUT_CATALOG_FILE_NAME, this.mutantsPerClass);
 	}
 }

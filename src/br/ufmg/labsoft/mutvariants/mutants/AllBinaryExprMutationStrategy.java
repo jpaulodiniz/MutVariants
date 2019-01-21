@@ -1,6 +1,7 @@
 package br.ufmg.labsoft.mutvariants.mutants;
 
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.stmt.DoStmt;
@@ -21,6 +22,12 @@ public class AllBinaryExprMutationStrategy extends BinaryExprMutationStrategy {
 	 *
 	 */
 	protected class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
+		
+		@Override
+		public void visit(MethodDeclaration methodDecl, MutantsGenerator mGen) {
+			mGen.currentMethod = methodDecl.getNameAsString();
+			super.visit(methodDecl, mGen);
+		}
 		
 		@Override
 		public void visit(ForStmt stmt, MutantsGenerator mGen) {
@@ -56,9 +63,11 @@ public class AllBinaryExprMutationStrategy extends BinaryExprMutationStrategy {
 		public void visit(BinaryExpr be, MutantsGenerator mGen) {
 			
 			boolean isChangePoint = isChangePoint(be, mGen);
+			String currMethod = mGen.currentMethod;
 			super.visit(be, mGen);
 			
 			if (isChangePoint) {
+				mGen.currentMethod = currMethod;
 				Expression mutatedExpr = AllBinaryExprMutationStrategy.this.mutateBinaryExpression(be, mGen);
 				if (mutatedExpr != null) {
 					be.replace(mutatedExpr);

@@ -2,6 +2,8 @@ package br.ufmg.labsoft.mutvariants.mutants;
 
 import java.util.EnumSet;
 
+import br.ufmg.labsoft.mutvariants.entity.MutantInfo;
+
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.BinaryExpr.Operator;
@@ -37,6 +39,15 @@ public class AllBinaryExprSchemataLibMutationStrategy extends AllBinaryExprMutat
 		for (Operator op : mOperators) {
 			String mutantVariableName = mGen.nextMutantVariableName();
 			mutantsList.add(new NameExpr(mutantVariableName));
+			
+			//generation mutant information for mutants catalog
+			MutantInfo mInfo = new MutantInfo();
+			mInfo.setMutantVariableName(mutantVariableName);
+			mInfo.setOriginaBinaryOperator(original.getOperator().asString());
+			mInfo.setMutatedBinaryOperator(op.asString());
+			mInfo.setMutatedClass(mGen.currentClassFQN);
+			mInfo.setMutatedMethod(mGen.currentMethod);
+			mGen.addMutantInfoToCatalog(mInfo);
 		}
 
 		NodeList<Expression> arguments = new NodeList<>();
