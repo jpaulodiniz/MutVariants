@@ -3,6 +3,7 @@ package br.ufmg.labsoft.mutvariants.mutants;
 import java.util.EnumSet;
 
 import br.ufmg.labsoft.mutvariants.entity.MutantInfo;
+import br.ufmg.labsoft.mutvariants.util.JavaBinaryOperatorsGroups;
 
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.BinaryExpr;
@@ -12,12 +13,74 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 
 /**
- * 
+ * Issue #1
  * @author jpaulo
  *
  */
 public class AllBinaryExprSchemataLibMutationStrategy extends AllBinaryExprMutationStrategy {
 
+	/**
+	 * 
+	 * @author jpaulo
+	 *
+	 */
+	private class NullComparisonVisitor extends com.github.javaparser.ast.visitor.GenericVisitorAdapter<Boolean, Void> {
+		
+		@Override
+		public Boolean visit(BinaryExpr be, Void v) {
+			
+			if (JavaBinaryOperatorsGroups.equalityOperators.contains(be.getOperator())) {
+				if (be.getRight().toString().equals("null")) {
+					return true;
+				}
+			}
+
+			Boolean result = super.visit(be, v);
+            return (result != null) ? result : false;
+		}
+	};
+		
+	/**
+	 * @author jpaulo
+	 * expressions like <code>obj != null && obj.something()</code> and
+	 * <code>obj == null || obj.something()</code> are not considered changePoint
+	 * because they cause null pointer exception even if the respective mutants 
+	 * are not set to <code>true</code> 
+	 */
+	@Override
+	public boolean isChangePoint(BinaryExpr be, MutantsGenerator mGen) {
+		
+//		if (Operator.AND.equals(original.getOperator())) return false;
+		if (JavaBinaryOperatorsGroups.logicalOperators.contains(be.getOperator())) { // && ||
+
+			NullComparisonVisitor nullVisitor = new NullComparisonVisitor();
+
+			Expression left = be.getLeft();
+
+			/*
+			 * TODO [JP] improve it
+			 * specific hardcoded for Chess system, avoiding vector out of bounds indexation
+			 * even whithout any active mutant
+			 */
+			if (left.toString().startsWith("nTam >= 11")) return false;
+
+			Boolean leftResult = left.accept(nullVisitor, null);
+			if (leftResult != null && leftResult) {
+				return false;
+			}
+
+			Expression right = be.getRight();
+			Boolean rightResult = right.accept(nullVisitor, null);
+			if (rightResult != null && rightResult) {
+				return false;
+			}
+
+			return true; //TODO [JP] temp 
+		}
+		
+		return super.isChangePoint(be, mGen);
+	}
+	
 	/**
 	 * 
 	 * @param original operand1 ORIGINAL operand2
