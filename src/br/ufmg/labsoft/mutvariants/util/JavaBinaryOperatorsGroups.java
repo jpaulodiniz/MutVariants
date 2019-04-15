@@ -46,6 +46,7 @@ public class JavaBinaryOperatorsGroups {
 	 * @param onlyEqualityOperators
 	 * @return cloned belonging group
 	 */
+	@Deprecated
 	public static EnumSet<Operator> belongingGroup(Operator original, boolean onlyEqualityOperators) {
 		
 		EnumSet<Operator> tempEnumSet = null;
