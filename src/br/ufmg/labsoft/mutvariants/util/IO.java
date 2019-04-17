@@ -12,12 +12,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import br.ufmg.labsoft.mutvariants.entity.MutantInfo;
-
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.TypeDeclaration;
+
+import br.ufmg.labsoft.mutvariants.entity.MutantInfo;
 
 public class IO {
 
@@ -61,8 +62,7 @@ public class IO {
 	 */
 	public static boolean writeCompilationUnit(CompilationUnit compUn, File outputDirectory) {
 
-		@SuppressWarnings("rawtypes")
-		List<TypeDeclaration> list = compUn.findAll(TypeDeclaration.class); //AnnotationDeclaration, ClassOrInterfaceDeclaration, EnumDeclaration
+		NodeList<TypeDeclaration<?>> list = compUn.getTypes(); //AnnotationDeclaration, ClassOrInterfaceDeclaration, EnumDeclaration
 		String className = null;
 		
 		if (list.size() == 1) { //a CompilationUnit may have only one class which can even be non public

@@ -15,6 +15,11 @@ public class SchemataLibMethods {
 		return (mutants[3] ? (left % right) : (mutants[2] ? (left / right) : (mutants[1] ? (left * right) : (mutants[0] ? (left - right) : (left + right)))));
 	}
 
+	public static float AOR_plus(float left, float right, boolean... mutants) {
+
+		return (mutants[3] ? (left % right) : (mutants[2] ? (left / right) : (mutants[1] ? (left * right) : (mutants[0] ? (left - right) : (left + right)))));
+	}
+
 	public static double AOR_plus(double left, double right, boolean... mutants) {
 
 		return (mutants[3] ? (left % right) : (mutants[2] ? (left / right) : (mutants[1] ? (left * right) : (mutants[0] ? (left - right) : (left + right)))));
@@ -27,6 +32,11 @@ public class SchemataLibMethods {
 	}
 
 	public static long AOR_minus(long left, long right, boolean... mutants) {
+
+		return (mutants[3] ? (left % right) : (mutants[2] ? (left / right) : (mutants[1] ? (left * right) : (mutants[0] ? (left + right) : (left - right)))));
+	}
+
+	public static float AOR_minus(float left, float right, boolean... mutants) {
 
 		return (mutants[3] ? (left % right) : (mutants[2] ? (left / right) : (mutants[1] ? (left * right) : (mutants[0] ? (left + right) : (left - right)))));
 	}
@@ -47,6 +57,11 @@ public class SchemataLibMethods {
 		return (mutants[3] ? (left % right) : (mutants[2] ? (left / right) : (mutants[1] ? (left - right) : (mutants[0] ? (left + right) : (left * right)))));
 	}
 
+	public static float AOR_multiply(float left, float right, boolean... mutants) {
+
+		return (mutants[3] ? (left % right) : (mutants[2] ? (left / right) : (mutants[1] ? (left - right) : (mutants[0] ? (left + right) : (left * right)))));
+	}
+
 	public static double AOR_multiply(double left, double right, boolean... mutants) {
 
 		return (mutants[3] ? (left % right) : (mutants[2] ? (left / right) : (mutants[1] ? (left - right) : (mutants[0] ? (left + right) : (left * right)))));
@@ -59,6 +74,11 @@ public class SchemataLibMethods {
 	}
 
 	public static long AOR_divide(long left, long right, boolean... mutants) {
+
+		return (mutants[3] ? (left % right) : (mutants[2] ? (left * right) : (mutants[1] ? (left - right) : (mutants[0] ? (left + right) : (left / right)))));
+	}
+
+	public static float AOR_divide(float left, float right, boolean... mutants) {
 
 		return (mutants[3] ? (left % right) : (mutants[2] ? (left * right) : (mutants[1] ? (left - right) : (mutants[0] ? (left + right) : (left / right)))));
 	}
@@ -79,6 +99,11 @@ public class SchemataLibMethods {
 		return (mutants[3] ? (left / right) : (mutants[2] ? (left * right) : (mutants[1] ? (left - right) : (mutants[0] ? (left + right) : (left % right)))));
 	}
 
+	public static float AOR_remainder(float left, float right, boolean... mutants) {
+
+		return (mutants[3] ? (left / right) : (mutants[2] ? (left * right) : (mutants[1] ? (left - right) : (mutants[0] ? (left + right) : (left % right)))));
+	}
+
 	public static double AOR_remainder(double left, double right, boolean... mutants) {
 
 		return (mutants[3] ? (left / right) : (mutants[2] ? (left * right) : (mutants[1] ? (left - right) : (mutants[0] ? (left + right) : (left % right)))));
@@ -90,12 +115,21 @@ public class SchemataLibMethods {
 		return (mutants[4] ? (left >= right) : (mutants[3] ? (left <= right) : (mutants[2] ? (left > right) : (mutants[1] ? (left < right) : (mutants[0] ? (left != right) : (left == right))))));
 	}
 
+	public static boolean ROR_equals(long left, long right, boolean... mutants) {
+
+		return (mutants[4] ? (left >= right) : (mutants[3] ? (left <= right) : (mutants[2] ? (left > right) : (mutants[1] ? (left < right) : (mutants[0] ? (left != right) : (left == right))))));
+	}
+
 	public static boolean ROR_equals(double left, double right, boolean... mutants) {
 
 		return (mutants[4] ? (left >= right) : (mutants[3] ? (left <= right) : (mutants[2] ? (left > right) : (mutants[1] ? (left < right) : (mutants[0] ? (left != right) : (left == right))))));
 	}
 
 	public static boolean ROR_not_equals(int left, int right, boolean... mutants) {
+
+		return (mutants[4] ? (left >= right) : (mutants[3] ? (left <= right) : (mutants[2] ? (left > right) : (mutants[1] ? (left < right) : (mutants[0] ? (left == right) : (left != right))))));
+	}
+	public static boolean ROR_not_equals(long left, long right, boolean... mutants) {
 
 		return (mutants[4] ? (left >= right) : (mutants[3] ? (left <= right) : (mutants[2] ? (left > right) : (mutants[1] ? (left < right) : (mutants[0] ? (left == right) : (left != right))))));
 	}
@@ -110,12 +144,22 @@ public class SchemataLibMethods {
 		return (mutants[4] ? (left >= right) : (mutants[3] ? (left <= right) : (mutants[2] ? (left > right) : (mutants[1] ? (left != right) : (mutants[0] ? (left == right) : (left < right))))));
 	}
 
+	public static boolean ROR_less(long left, long right, boolean... mutants) {
+
+		return (mutants[4] ? (left >= right) : (mutants[3] ? (left <= right) : (mutants[2] ? (left > right) : (mutants[1] ? (left != right) : (mutants[0] ? (left == right) : (left < right))))));
+	}
+
 	public static boolean ROR_less(double left, double right, boolean... mutants) {
 
 		return (mutants[4] ? (left >= right) : (mutants[3] ? (left <= right) : (mutants[2] ? (left > right) : (mutants[1] ? (left != right) : (mutants[0] ? (left == right) : (left < right))))));
 	}
 
 	public static boolean ROR_greater(int left, int right, boolean... mutants) {
+
+		return (mutants[4] ? (left >= right) : (mutants[3] ? (left <= right) : (mutants[2] ? (left < right) : (mutants[1] ? (left != right) : (mutants[0] ? (left == right) : (left > right))))));
+	}
+
+	public static boolean ROR_greater(long left, long right, boolean... mutants) {
 
 		return (mutants[4] ? (left >= right) : (mutants[3] ? (left <= right) : (mutants[2] ? (left < right) : (mutants[1] ? (left != right) : (mutants[0] ? (left == right) : (left > right))))));
 	}
@@ -130,6 +174,11 @@ public class SchemataLibMethods {
 		return (mutants[4] ? (left >= right) : (mutants[3] ? (left > right) : (mutants[2] ? (left < right) : (mutants[1] ? (left != right) : (mutants[0] ? (left == right) : (left <= right))))));
 	}
 
+	public static boolean ROR_less_equals(long left, long right, boolean... mutants) {
+
+		return (mutants[4] ? (left >= right) : (mutants[3] ? (left > right) : (mutants[2] ? (left < right) : (mutants[1] ? (left != right) : (mutants[0] ? (left == right) : (left <= right))))));
+	}
+
 	public static boolean ROR_less_equals(double left, double right, boolean... mutants) {
 
 		return (mutants[4] ? (left >= right) : (mutants[3] ? (left > right) : (mutants[2] ? (left < right) : (mutants[1] ? (left != right) : (mutants[0] ? (left == right) : (left <= right))))));
@@ -140,6 +189,11 @@ public class SchemataLibMethods {
 		return (mutants[4] ? (left <= right) : (mutants[3] ? (left > right) : (mutants[2] ? (left < right) : (mutants[1] ? (left != right) : (mutants[0] ? (left == right) : (left >= right))))));
 	}
 
+	public static boolean ROR_greater_equals(long left, long right, boolean... mutants) {
+
+		return (mutants[4] ? (left <= right) : (mutants[3] ? (left > right) : (mutants[2] ? (left < right) : (mutants[1] ? (left != right) : (mutants[0] ? (left == right) : (left >= right))))));
+	}
+	
 	public static boolean ROR_greater_equals(double left, double right, boolean... mutants) {
 
 		return (mutants[4] ? (left <= right) : (mutants[3] ? (left > right) : (mutants[2] ? (left < right) : (mutants[1] ? (left != right) : (mutants[0] ? (left == right) : (left >= right))))));
