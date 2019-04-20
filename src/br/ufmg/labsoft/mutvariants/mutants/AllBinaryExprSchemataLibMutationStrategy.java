@@ -30,12 +30,18 @@ public class AllBinaryExprSchemataLibMutationStrategy extends AllBinaryExprMutat
 		
 		@Override
 		public Boolean visit(BinaryExpr be, Void v) {
-			
+
 			if (JavaBinaryOperatorsGroups.equalityOperators.contains(be.getOperator())) {
 				if (be.getRight().toString().equals("null")) {
 					return true;
 				}
 			}
+//			if (JavaBinaryOperatorsGroups.relationalOperators.contains(be.getOperator())) {
+				if (be.getRight().toString().endsWith(".size()") || be.getRight().toString().endsWith(".length()") || be.getRight().toString().endsWith(".length") ||
+						be.getLeft().toString().endsWith(".size()") || be.getLeft().toString().endsWith(".length()") || be.getLeft().toString().endsWith(".length")) {
+					return true;
+				}
+//			}
 
 			Boolean result = super.visit(be, v);
             return (result != null) ? result : false;
