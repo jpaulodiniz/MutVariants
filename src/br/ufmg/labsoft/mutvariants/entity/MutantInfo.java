@@ -6,16 +6,16 @@ package br.ufmg.labsoft.mutvariants.entity;
  *
  */
 public class MutantInfo {
-	
+
 	private String mutantVariableName; //mutant id
 	private String mutationOperator;
 
 	private String mutatedClass;
-	private String mutatedMethod;
+	private String mutatedOperation; //method or constructor
 
 	private String originaBinaryOperator;
 	private String mutatedBinaryOperator;
-	
+
 	public String getMutantVariableName() {
 		return mutantVariableName;
 	}
@@ -40,12 +40,12 @@ public class MutantInfo {
 		this.mutatedClass = mutatedClass;
 	}
 
-	public String getMutatedMethod() {
-		return mutatedMethod;
+	public String getMutatedOperation() {
+		return mutatedOperation;
 	}
 
-	public void setMutatedMethod(String mutatedMethod) {
-		this.mutatedMethod = mutatedMethod;
+	public void setMutatedOperation(String mutatedOperation) {
+		this.mutatedOperation = mutatedOperation;
 	}
 
 	public String getOriginaBinaryOperator() {
@@ -65,12 +65,12 @@ public class MutantInfo {
 	}
 
 	public String toString() {
-		
+
 		StringBuilder sb = new StringBuilder();
 		sb.append(mutantVariableName).append(',');
 //		sb.append(mutationOperator).append(',');
 		sb.append(mutatedClass).append(',');
-		sb.append(mutatedMethod).append(',');
+		sb.append(mutatedOperation).append(',');
 		sb.append(originaBinaryOperator).append(',');
 		sb.append(mutatedBinaryOperator);
 
@@ -78,7 +78,7 @@ public class MutantInfo {
 	}
 
 	public static String infoHeader() { //based on toString order
-		
+
 		StringBuilder sb = new StringBuilder();
 		sb.append("Mutant Variable Name,");
 //		sb.append("Mutation Operator,");

@@ -1,6 +1,7 @@
 package br.ufmg.labsoft.mutvariants.mutants;
 
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.Expression;
@@ -15,20 +16,26 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
  *
  */
 public class AllBinaryExprMutationStrategy extends BinaryExprMutationStrategy {
-	
+
 	/**
 	 * 
 	 * @author jpaulo
 	 *
 	 */
 	protected class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
-		
+
 		@Override
 		public void visit(MethodDeclaration methodDecl, MutantsGenerator mGen) {
-			mGen.currentMethod = methodDecl.getNameAsString();
+			mGen.currentOperation = methodDecl.getNameAsString() + "_" + methodDecl.getBegin().get().line;
 			super.visit(methodDecl, mGen);
 		}
-		
+
+		@Override
+		public void visit(ConstructorDeclaration constructorDecl, MutantsGenerator mGen) {
+			mGen.currentOperation = constructorDecl.getNameAsString() + "_" + constructorDecl.getBegin().get().line;
+			super.visit(constructorDecl, mGen);
+		}
+
 		@Override
 		public void visit(ForStmt stmt, MutantsGenerator mGen) {
 	        stmt.getBody().accept(this, mGen);
@@ -61,13 +68,13 @@ public class AllBinaryExprMutationStrategy extends BinaryExprMutationStrategy {
 
 		@Override
 		public void visit(BinaryExpr be, MutantsGenerator mGen) {
-			
+
 			boolean isChangePoint = isChangePoint(be, mGen);
-			String currMethod = mGen.currentMethod;
+			String currOperation = mGen.currentOperation;
 			super.visit(be, mGen);
-			
+
 			if (isChangePoint) {
-				mGen.currentMethod = currMethod;
+				mGen.currentOperation = currOperation;
 				Expression mutatedExpr = AllBinaryExprMutationStrategy.this.mutateBinaryExpression(be, mGen);
 				if (mutatedExpr != null) {
 					be.replace(mutatedExpr);
@@ -83,7 +90,6 @@ public class AllBinaryExprMutationStrategy extends BinaryExprMutationStrategy {
 	public void generateMutants(ClassOrInterfaceDeclaration mutClass, MutantsGenerator mutGen) {
 
 		MutationVisitor mutVisitor = new MutationVisitor();
-		mutClass.accept(mutVisitor, mutGen);		
+		mutClass.accept(mutVisitor, mutGen);
 	}
-
 }

@@ -48,7 +48,7 @@ public class MutantsGenerator {
 	private Map<String, List<String>> mutantsPerClass; //key: class FQN; value: list of mutants
 	
 	public String currentClassFQN; //helper field: current class fully qualified name (FQN)
-	public String currentMethod; //helper field: Issue #3
+	public String currentOperation; //helper field: Issue #3
 	private long mutantsCounterGlobal; //helper field
 
 	/**

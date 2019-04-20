@@ -113,7 +113,7 @@ public class AllBinaryExprSchemataLibMutationStrategy extends AllBinaryExprMutat
 			mInfo.setOriginaBinaryOperator(original.getOperator().asString());
 			mInfo.setMutatedBinaryOperator(op.asString());
 			mInfo.setMutatedClass(mGen.currentClassFQN);
-			mInfo.setMutatedMethod(mGen.currentMethod);
+			mInfo.setMutatedOperation(mGen.currentOperation);
 			mGen.addMutantInfoToCatalog(mInfo);
 		}
 		
