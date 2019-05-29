@@ -2,6 +2,7 @@ package br.ufmg.labsoft.mutvariants;
 
 import java.io.IOException;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Properties;
 
 import com.github.javaparser.ast.CompilationUnit;
@@ -11,7 +12,6 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.JarTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 
-import br.ufmg.labsoft.mutvariants.mutants.AllBinaryExprMutationStrategy;
 import br.ufmg.labsoft.mutvariants.mutants.AllBinaryExprSchemataLibMutationStrategy;
 import br.ufmg.labsoft.mutvariants.mutants.BinaryExprMutationStrategy;
 import br.ufmg.labsoft.mutvariants.mutants.MutantsGenerator;
@@ -26,12 +26,15 @@ public class Main {
 		//TODO change path and/or properties name
 		Properties ioConf = IO.loadProperties("resources/sample.properties");
 		String baseDir = ioConf.getProperty("base-dir");
-		String inputDir = baseDir + ioConf.getProperty("input-dir");
-		String outputDir = baseDir + ioConf.getProperty("output-dir-mut-schemata");
+		List<String> inputDirs = IO.getPaths(baseDir, ioConf.getProperty("input-dir"));
+		List<String> outputDirs = IO.getPaths(baseDir, ioConf.getProperty("output-dir-mut-schemata"));
 
 		CombinedTypeSolver typeSolvers = new CombinedTypeSolver();
 		typeSolvers.add(new ReflectionTypeSolver());
-		typeSolvers.add(new JavaParserTypeSolver(inputDir));
+
+		for (String inputDir : inputDirs) {
+			typeSolvers.add(new JavaParserTypeSolver(inputDir));
+		} 
 
 		String jarsStr = ioConf.getProperty("dependent-jars-full-path", "");
 		if (!jarsStr.isEmpty()) {
@@ -55,7 +58,7 @@ public class Main {
 		mg.setMutStrategy(mutStrategy);
 		mg.setTypeSolver(typeSolvers);
 		
-		mg.mutatePackageOrDirectory(inputDir, outputDir);
+		mg.mutateSourceFolders(inputDirs, outputDirs, IO.getPaths(baseDir, ioConf.getProperty("output-catalogue-group-files")).get(0));
 
 //		testMutateOneClass(mg);
 	}

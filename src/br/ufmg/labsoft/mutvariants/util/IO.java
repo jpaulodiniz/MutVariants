@@ -22,6 +22,18 @@ import br.ufmg.labsoft.mutvariants.entity.MutantInfo;
 
 public class IO {
 
+	public static List<String> getPaths(String base, String paths) {
+		
+		List<String> pathsList = new ArrayList<String>();
+		String[] tempPaths = paths.split(",");
+		
+		for (String tempPath : tempPaths) {
+			pathsList.add(base + tempPath);
+		}
+		
+		return pathsList;
+	}
+	
 	public static CompilationUnit getCompilationUnitFromFile(File inputFile) {
 
         CompilationUnit c = null;

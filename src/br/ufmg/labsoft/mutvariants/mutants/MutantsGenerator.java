@@ -7,10 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import br.ufmg.labsoft.mutvariants.entity.MutantInfo;
-import br.ufmg.labsoft.mutvariants.util.Constants;
-import br.ufmg.labsoft.mutvariants.util.IO;
-
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
@@ -22,6 +18,10 @@ import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.PrimitiveType.Primitive;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
+
+import br.ufmg.labsoft.mutvariants.entity.MutantInfo;
+import br.ufmg.labsoft.mutvariants.util.Constants;
+import br.ufmg.labsoft.mutvariants.util.IO;
 
 /*
  * TODO(s)
@@ -234,15 +234,31 @@ public class MutantsGenerator {
 		return mutantName.toString();
 	}
 
+	public void mutateSourceFolders(List<String> inputPaths, List<String> outputPaths, String catalogueAndGroupPath) {
+		
+		this.mutantsCounterGlobal = 0;
+
+		long ini = System.currentTimeMillis();
+
+		for (int i = 0; i < inputPaths.size(); i++) {
+			mutatePackageOrDirectory(inputPaths.get(i), outputPaths.get(i));
+		}
+
+		IO.saveMutantsCatalog(catalogueAndGroupPath, Constants.MUT_CATALOG_FILE_NAME, this.mutantsCatalog);
+		IO.saveGroupsOfMutants(catalogueAndGroupPath, Constants.GROUPS_OF_MUTANTS_FILE_NAME, this.groupsOfMutants);
+
+		long fin = System.currentTimeMillis();
+		
+		System.out.print("\n>>>>> " + this.mutantsCounterGlobal + " mutants seeded");
+		System.out.println(" in " + (fin - ini) + "ms");
+	}
+
 	/**
 	 *
 	 * @param inputPath
 	 */
 	public void mutatePackageOrDirectory(String inputPath, String outputPath) {
 
-		long ini = System.currentTimeMillis();
-		
-		this.mutantsCounterGlobal = 0;
 		int countMutatedCompilationUnits = 0;
 
 		for (File f : IO.allJavaFilesIn(inputPath)) {
@@ -253,20 +269,11 @@ public class MutantsGenerator {
 
 			if (mutated.getImports().stream().anyMatch(i -> i.getNameAsString().startsWith(Constants.VAREXJ_CONDITIONAL_FQN))) {
 				++countMutatedCompilationUnits;
+				IO.writeCompilationUnit(mutated, new File(outputPath));
 			}
-
-			IO.writeCompilationUnit(mutated, new File(outputPath));
 		}
 
-		long fin = System.currentTimeMillis();
-		
-		System.out.print("\n>>>>> " + this.mutantsCounterGlobal + " mutants seeded");
-		System.out.print(" in " + countMutatedCompilationUnits + " mutated compilation units");
-		System.out.println(", in " + (fin - ini) + "ms");
-		
+		System.out.print(countMutatedCompilationUnits + " mutated compilation units");
 		System.out.println(">>>>> Mutants Mapping:\n" + this.mutantsPerClass);
-//		IO.saveMutantsCatalog(outputPath, Constants.MUT_CATALOG_FILE_NAME, this.mutantsPerClass);
-		IO.saveMutantsCatalog(outputPath, Constants.MUT_CATALOG_FILE_NAME, this.mutantsCatalog);
-		IO.saveGroupsOfMutants(outputPath, Constants.GROUPS_OF_MUTANTS_FILE_NAME, this.groupsOfMutants);
 	}
 }
