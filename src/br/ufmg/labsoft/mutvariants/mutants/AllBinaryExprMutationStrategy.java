@@ -5,10 +5,14 @@ import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
 import com.github.javaparser.ast.stmt.DoStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
+import com.github.javaparser.ast.stmt.ForeachStmt;
 import com.github.javaparser.ast.stmt.WhileStmt;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
+
+import br.ufmg.labsoft.mutvariants.listeners.ListenerUtil;
 
 /**
  * 
@@ -25,15 +29,31 @@ public class AllBinaryExprMutationStrategy extends BinaryExprMutationStrategy {
 	protected class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 
 		@Override
+		public void visit(SingleMemberAnnotationExpr annotExpr, MutantsGenerator mGen) {
+		}
+
+		@Override
 		public void visit(MethodDeclaration methodDecl, MutantsGenerator mGen) {
 			mGen.currentOperation = methodDecl.getNameAsString() + "_" + methodDecl.getBegin().get().line;
+
+			long mutCountBefore = mGen.getMutantsCounterGlobal();
+
 			super.visit(methodDecl, mGen);
+
+			long mutCountAfter = mGen.getMutantsCounterGlobal();
+			//if mGen.generateListener()) TODO create attr and replicate this if
+			ListenerUtil.insertListenerCallInMethodBody(methodDecl, mGen, mutCountBefore, mutCountAfter);
 		}
 
 		@Override
 		public void visit(ConstructorDeclaration constructorDecl, MutantsGenerator mGen) {
 			mGen.currentOperation = constructorDecl.getNameAsString() + "_" + constructorDecl.getBegin().get().line;
+
+			long mutCountBefore = mGen.getMutantsCounterGlobal();
 			super.visit(constructorDecl, mGen);
+
+			long mutCountAfter = mGen.getMutantsCounterGlobal();
+			ListenerUtil.insertListenerCallInConstructorBody(constructorDecl, mGen, mutCountBefore, mutCountAfter);
 		}
 
 		@Override
@@ -46,6 +66,18 @@ public class AllBinaryExprMutationStrategy extends BinaryExprMutationStrategy {
 //		        stmt.getUpdate().forEach(p -> p.accept(this, mGen));
 	        }
 	        stmt.getComment().ifPresent(l -> l.accept(this, mGen));
+
+			ListenerUtil.insertListenerCallInLoopBody(stmt.getBody(), mGen);
+		}
+
+		@Override
+		public void visit(ForeachStmt stmt, MutantsGenerator mGen) {
+	        stmt.getBody().accept(this, mGen);
+//	        stmt.getIterable().accept(this, mGen);
+//	        stmt.getVariable().accept(this, mGen);
+	        stmt.getComment().ifPresent(l -> l.accept(this, mGen));
+	        
+			ListenerUtil.insertListenerCallInLoopBody(stmt.getBody(), mGen);
 		}
 
 		@Override
@@ -55,6 +87,8 @@ public class AllBinaryExprMutationStrategy extends BinaryExprMutationStrategy {
 	        	stmt.getCondition().accept(this, mGen);
 	        }
 			stmt.getComment().ifPresent(l -> l.accept(this, mGen));
+
+			ListenerUtil.insertListenerCallInLoopBody(stmt.getBody(), mGen);
 		}
 
 		@Override
@@ -64,6 +98,8 @@ public class AllBinaryExprMutationStrategy extends BinaryExprMutationStrategy {
 				stmt.getCondition().accept(this, mGen);
 	        }
 			stmt.getComment().ifPresent(l -> l.accept(this, mGen));
+
+			ListenerUtil.insertListenerCallInLoopBody(stmt.getBody(), mGen);
 		}
 
 		@Override

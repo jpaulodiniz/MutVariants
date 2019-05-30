@@ -4,15 +4,15 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
-import br.ufmg.labsoft.mutvariants.entity.MutantInfo;
-import br.ufmg.labsoft.mutvariants.util.JavaBinaryOperatorsGroups;
-
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.BinaryExpr.Operator;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
+
+import br.ufmg.labsoft.mutvariants.entity.MutantInfo;
+import br.ufmg.labsoft.mutvariants.util.JavaBinaryOperatorsGroups;
 
 /**
  * Issue #1
@@ -37,10 +37,10 @@ public class AllBinaryExprSchemataLibMutationStrategy extends AllBinaryExprMutat
 				}
 			}
 //			if (JavaBinaryOperatorsGroups.relationalOperators.contains(be.getOperator())) {
-				if (be.getRight().toString().endsWith(".size()") || be.getRight().toString().endsWith(".length()") || be.getRight().toString().endsWith(".length") ||
-						be.getLeft().toString().endsWith(".size()") || be.getLeft().toString().endsWith(".length()") || be.getLeft().toString().endsWith(".length")) {
-					return true;
-				}
+			if (be.getRight().toString().endsWith(".size()") || be.getRight().toString().endsWith(".length()") || be.getRight().toString().endsWith(".length") ||
+					be.getLeft().toString().endsWith(".size()") || be.getLeft().toString().endsWith(".length()") || be.getLeft().toString().endsWith(".length")) {
+				return true;
+			}
 //			}
 
 			Boolean result = super.visit(be, v);
@@ -58,7 +58,6 @@ public class AllBinaryExprSchemataLibMutationStrategy extends AllBinaryExprMutat
 	@Override
 	public boolean isChangePoint(BinaryExpr be, MutantsGenerator mGen) {
 		
-//		if (Operator.AND.equals(original.getOperator())) return false;
 		if (JavaBinaryOperatorsGroups.logicalOperators.contains(be.getOperator())) { // && ||
 
 			NullComparisonVisitor nullVisitor = new NullComparisonVisitor();
@@ -70,7 +69,7 @@ public class AllBinaryExprSchemataLibMutationStrategy extends AllBinaryExprMutat
 			 * specific hardcoded for Chess system, avoiding vector out of bounds indexation
 			 * even whithout any active mutant
 			 */
-			if (left.toString().startsWith("nTam >= 11")) return false;
+//			if (left.toString().startsWith("nTam >= 11")) return false;
 
 			Boolean leftResult = left.accept(nullVisitor, null);
 			if (leftResult != null && leftResult) {
@@ -104,7 +103,12 @@ public class AllBinaryExprSchemataLibMutationStrategy extends AllBinaryExprMutat
 				availableOperatorsForMutation(original.getOperator(), false);
 
 		if (mOperators == null || mOperators.isEmpty()) return null;
-		
+
+		//TODO LCR original mutation with ternary operator
+		if (JavaBinaryOperatorsGroups.logicalOperators.contains(original.getOperator())) { // && ||
+			return super.mutateBinaryExpression(original, mGen);
+		}
+
 		List<String> groupOfMutants = new ArrayList<>(); //Issue #4
 		NodeList<Expression> mutantsList = new NodeList<>();
 
@@ -128,6 +132,7 @@ public class AllBinaryExprSchemataLibMutationStrategy extends AllBinaryExprMutat
 		NodeList<Expression> arguments = new NodeList<>();
 		arguments.add(original.getLeft().clone());
 		arguments.add(original.getRight().clone());
+//		arguments.add(new StringLiteralExpr(mGen.currentClassFQN + "." + mGen.currentOperation));
 
 		MethodCallExpr mce = new MethodCallExpr((Expression)null, "tempname_", arguments);
 		mce.getArguments().addAll(mutantsList);

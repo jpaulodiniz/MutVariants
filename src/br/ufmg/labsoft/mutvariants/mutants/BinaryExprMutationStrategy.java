@@ -5,18 +5,19 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Random;
 
-import br.ufmg.labsoft.mutvariants.entity.MutantInfo;
-import br.ufmg.labsoft.mutvariants.util.JavaBinaryOperatorsGroups;
-import br.ufmg.labsoft.mutvariants.util.TypeUtil;
-
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.BinaryExpr.Operator;
 import com.github.javaparser.ast.expr.ConditionalExpr;
 import com.github.javaparser.ast.expr.EnclosedExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
+
+import br.ufmg.labsoft.mutvariants.entity.MutantInfo;
+import br.ufmg.labsoft.mutvariants.util.JavaBinaryOperatorsGroups;
+import br.ufmg.labsoft.mutvariants.util.TypeUtil;
 
 /**
  * 
@@ -73,7 +74,26 @@ public abstract class BinaryExprMutationStrategy implements MutationStrategy {
 		//avoiding mutating String concatenator operator +
 		if (BinaryExpr.Operator.PLUS.equals(be.getOperator())) {
 
-			ResolvedType type = JavaParserFacade.get(mGen.getTypeSolver()).getType(be);
+			ResolvedType type = null;
+			
+			try {
+				type = JavaParserFacade.get(mGen.getTypeSolver()).getType(be); 
+			}
+			catch (UnsolvedSymbolException use) {
+				System.err.println("USE_Str: " + be + "\n" + use.getMessage());
+				return false;
+//				throw use;
+			}
+			catch (UnsupportedOperationException uoe) {
+				System.err.println("UOE_Str: " + be + "\n" + uoe.getMessage());
+				return false;
+			}
+			catch (RuntimeException re) {
+				System.err.println("RE_Str: " + be + "\n" + re.getMessage());
+				return false;
+//				throw re;
+			}
+			
 			if (TypeUtil.isString(type)) {
 //				throw new RuntimeException("can't 1: " + original);
 				return false;
@@ -87,9 +107,37 @@ public abstract class BinaryExprMutationStrategy implements MutationStrategy {
 				return false;
 			}
 			
-			ResolvedType typeLeft = JavaParserFacade.get(mGen.getTypeSolver()).getType(be.getLeft());
-			ResolvedType typeRight = JavaParserFacade.get(mGen.getTypeSolver()).getType(be.getRight());
+			ResolvedType typeLeft = null;
+			ResolvedType typeRight = null;
 
+			try {
+				typeLeft = JavaParserFacade.get(mGen.getTypeSolver()).getType(be.getLeft());
+			}
+			catch (UnsolvedSymbolException use) {
+				System.err.println("USE_L: " + be + "\n" + use.getMessage());
+				return false;
+//				throw use;
+			}
+			catch (RuntimeException re) {
+				System.err.println("RE_L: " + be + "\n" + re.getMessage());
+				return false;
+//				throw re;
+			}
+
+			try {
+				typeRight = JavaParserFacade.get(mGen.getTypeSolver()).getType(be.getRight());
+			}
+			catch (UnsolvedSymbolException use) {
+				System.err.println("USE_R: " + be + "\n" + use.getMessage());
+				return false;
+//				throw use;
+			}
+			catch (RuntimeException re) {
+				System.err.println("RE_R: " + be + "\n" + re.getMessage());
+				return false;
+//				throw re;
+			}
+			
 			//ensures mutations on expressions like var.size() == 4
 			if (!TypeUtil.isNumberPrimitiveOrWrapper(typeLeft) || !TypeUtil.isNumberPrimitiveOrWrapper(typeRight)) {
 //				equalityOperatorNoNumbers = true;

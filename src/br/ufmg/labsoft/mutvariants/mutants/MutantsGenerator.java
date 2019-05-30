@@ -114,6 +114,10 @@ public class MutantsGenerator {
 		this.typeSolver = typeSolver;
 	}
 
+	public long getMutantsCounterGlobal() {
+		return this.mutantsCounterGlobal;
+	}
+
 	/**
 	 * Issue #3
 	 */
