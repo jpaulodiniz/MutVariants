@@ -34,26 +34,31 @@ public class AllBinaryExprMutationStrategy extends BinaryExprMutationStrategy {
 
 		@Override
 		public void visit(MethodDeclaration methodDecl, MutantsGenerator mGen) {
-			mGen.currentOperation = methodDecl.getNameAsString() + "_" + methodDecl.getBegin().get().line;
+			mGen.setCurrentOperation(methodDecl.getNameAsString() + "_" + methodDecl.getBegin().get().line);
 
 			long mutCountBefore = mGen.getMutantsCounterGlobal();
 
 			super.visit(methodDecl, mGen);
 
 			long mutCountAfter = mGen.getMutantsCounterGlobal();
-			//if mGen.generateListener()) TODO create attr and replicate this if
-			ListenerUtil.insertListenerCallInMethodBody(methodDecl, mGen, mutCountBefore, mutCountAfter);
+
+	        if (mGen.getListenerCallsInstrumentation()) {
+	        	ListenerUtil.insertListenerCallInMethodBody(methodDecl, mGen, mutCountBefore, mutCountAfter);
+	        }
 		}
 
 		@Override
 		public void visit(ConstructorDeclaration constructorDecl, MutantsGenerator mGen) {
-			mGen.currentOperation = constructorDecl.getNameAsString() + "_" + constructorDecl.getBegin().get().line;
+			mGen.setCurrentOperation(constructorDecl.getNameAsString() + "_" + constructorDecl.getBegin().get().line);
 
 			long mutCountBefore = mGen.getMutantsCounterGlobal();
 			super.visit(constructorDecl, mGen);
 
 			long mutCountAfter = mGen.getMutantsCounterGlobal();
-			ListenerUtil.insertListenerCallInConstructorBody(constructorDecl, mGen, mutCountBefore, mutCountAfter);
+
+	        if (mGen.getListenerCallsInstrumentation()) {
+	        	ListenerUtil.insertListenerCallInConstructorBody(constructorDecl, mGen, mutCountBefore, mutCountAfter);
+	        }
 		}
 
 		@Override
@@ -67,7 +72,9 @@ public class AllBinaryExprMutationStrategy extends BinaryExprMutationStrategy {
 	        }
 	        stmt.getComment().ifPresent(l -> l.accept(this, mGen));
 
-			ListenerUtil.insertListenerCallInLoopBody(stmt.getBody(), mGen);
+	        if (mGen.getListenerCallsInstrumentation()) {
+	        	ListenerUtil.insertListenerCallInLoopBody(stmt.getBody(), mGen);
+	        }
 		}
 
 		@Override
@@ -77,7 +84,10 @@ public class AllBinaryExprMutationStrategy extends BinaryExprMutationStrategy {
 //	        stmt.getVariable().accept(this, mGen);
 	        stmt.getComment().ifPresent(l -> l.accept(this, mGen));
 	        
-			ListenerUtil.insertListenerCallInLoopBody(stmt.getBody(), mGen);
+
+	        if (mGen.getListenerCallsInstrumentation()) {
+	        	ListenerUtil.insertListenerCallInLoopBody(stmt.getBody(), mGen);
+	        }
 		}
 
 		@Override
@@ -88,7 +98,9 @@ public class AllBinaryExprMutationStrategy extends BinaryExprMutationStrategy {
 	        }
 			stmt.getComment().ifPresent(l -> l.accept(this, mGen));
 
-			ListenerUtil.insertListenerCallInLoopBody(stmt.getBody(), mGen);
+	        if (mGen.getListenerCallsInstrumentation()) {
+	        	ListenerUtil.insertListenerCallInLoopBody(stmt.getBody(), mGen);
+	        }
 		}
 
 		@Override
@@ -99,18 +111,20 @@ public class AllBinaryExprMutationStrategy extends BinaryExprMutationStrategy {
 	        }
 			stmt.getComment().ifPresent(l -> l.accept(this, mGen));
 
-			ListenerUtil.insertListenerCallInLoopBody(stmt.getBody(), mGen);
+	        if (mGen.getListenerCallsInstrumentation()) {
+	        	ListenerUtil.insertListenerCallInLoopBody(stmt.getBody(), mGen);
+	        }
 		}
 
 		@Override
 		public void visit(BinaryExpr be, MutantsGenerator mGen) {
 
 			boolean isChangePoint = isChangePoint(be, mGen);
-			String currOperation = mGen.currentOperation;
+			String currOperation = mGen.getCurrentOperation();
 			super.visit(be, mGen);
 
 			if (isChangePoint) {
-				mGen.currentOperation = currOperation;
+				mGen.setCurrentOperation(currOperation);
 				Expression mutatedExpr = AllBinaryExprMutationStrategy.this.mutateBinaryExpression(be, mGen);
 				if (mutatedExpr != null) {
 					be.replace(mutatedExpr);

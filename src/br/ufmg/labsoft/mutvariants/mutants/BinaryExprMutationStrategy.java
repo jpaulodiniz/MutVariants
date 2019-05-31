@@ -184,8 +184,8 @@ public abstract class BinaryExprMutationStrategy implements MutationStrategy {
 			mInfo.setMutantVariableName(mutantVariableName);
 			mInfo.setOriginaBinaryOperator(original.getOperator().asString());
 			mInfo.setMutatedBinaryOperator(op.asString());
-			mInfo.setMutatedClass(mGen.currentClassFQN);
-			mInfo.setMutatedOperation(mGen.currentOperation);
+			mInfo.setMutatedClass(mGen.getCurrentClassFQN());
+			mInfo.setMutatedOperation(mGen.getCurrentOperation());
 			mGen.addMutantInfoToCatalog(mInfo);
 
 			mutantExpressionTemp = new ConditionalExpr(

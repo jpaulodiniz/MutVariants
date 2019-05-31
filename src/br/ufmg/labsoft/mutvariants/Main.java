@@ -53,8 +53,9 @@ public class Main {
 
 		MutantsGenerator mg = new MutantsGenerator();
 		mg.setAllPossibleMutationsPerChangePoint(true);
-		mg.setMutateLoopConditions(false);
 		mg.setMutationRate(1d);
+		mg.setMutateLoopConditions(false);
+		mg.setListenerCallsInstrumentation(false);
 		mg.setMutStrategy(mutStrategy);
 		mg.setTypeSolver(typeSolvers);
 		

@@ -41,23 +41,28 @@ import br.ufmg.labsoft.mutvariants.util.IO;
  */
 public class MutantsGenerator {
 
+	// attributes to control mutants generation
+
 	private List<MutantInfo> mutantsCatalog; //Issue #3
 	private List<List<String>> groupsOfMutants; //Issue #4
 
 	@Deprecated
 	private Map<String, List<String>> mutantsPerClass; //key: class FQN; value: list of mutants
-	
-	public String currentClassFQN; //helper field: current class fully qualified name (FQN)
-	public String currentOperation; //helper field: Issue #3
+
+	private String currentClassFQN; //helper field: current class fully qualified name (FQN)
+	private String currentOperation; //helper field: Issue #3
 	private long mutantsCounterGlobal; //helper field
+
+	// configuration attributes
 
 	/**
 	 * generates all possible mutants per change point
 	 * E.g.: for a + b expression, all available mutations -, *, / and %
 	 */
 	private boolean allPossibleMutationsPerChangePoint = false;
+	private double mutationRate = 1d;
 	private boolean mutateLoopConditions = false;
-	private double mutationRate = 1d; 
+	private boolean listenerCallsInstrumentation; //Issue #5
 	private MutationStrategy mutStrategy;
 	private TypeSolver typeSolver;
 
@@ -86,6 +91,14 @@ public class MutantsGenerator {
 		return mutateLoopConditions;
 	}
 
+	public boolean getListenerCallsInstrumentation() {
+		return listenerCallsInstrumentation;
+	}
+
+	public void setListenerCallsInstrumentation(boolean listenerCallsInstrumentation) {
+		this.listenerCallsInstrumentation = listenerCallsInstrumentation;
+	}
+
 	public void setMutateLoopConditions(boolean mutateLoopConditions) {
 		this.mutateLoopConditions = mutateLoopConditions;
 	}
@@ -112,6 +125,18 @@ public class MutantsGenerator {
 
 	public void setTypeSolver(TypeSolver typeSolver) {
 		this.typeSolver = typeSolver;
+	}
+
+	public String getCurrentClassFQN() {
+		return this.currentClassFQN;
+	}
+
+	public String getCurrentOperation() {
+		return this.currentOperation;
+	}
+
+	public void setCurrentOperation(String currentOperation) {
+		this.currentOperation = currentOperation;
 	}
 
 	public long getMutantsCounterGlobal() {
@@ -145,7 +170,7 @@ public class MutantsGenerator {
 		if (this.currentClassFQN.endsWith("Exception")) {
 			return;
 		}
-		
+
 		//strategy
 		this.getMutStrategy().generateMutants(mClass, this);
 
@@ -171,7 +196,7 @@ public class MutantsGenerator {
 //					new PrimitiveType(Primitive.BOOLEAN), Constants.MUTANT_VARIABLE_PREFIX, new BooleanLiteralExpr(false),
 //					Modifier.PUBLIC, Modifier.STATIC);
 
-			mClass.getMembers().add(0, fieldDecl);		
+			mClass.getMembers().add(0, fieldDecl);
 		}
 	}
 
@@ -180,11 +205,11 @@ public class MutantsGenerator {
 	 * @return
 	 */
 	public CompilationUnit generateMutants(CompilationUnit original) {
-		
+
 		int mutantsCounterPerCompUn = 0;
 
 		CompilationUnit mcu = original.clone(); //mcu: mutated compilation unit
-		List<ClassOrInterfaceDeclaration> classes = mcu.findAll(ClassOrInterfaceDeclaration.class, 
+		List<ClassOrInterfaceDeclaration> classes = mcu.findAll(ClassOrInterfaceDeclaration.class,
 				c -> !c.isInterface() && !c.isNestedType()); // && !c.isInnerClass() && !c.isStatic()
 
 		//mutate each class in compilation unit
@@ -212,18 +237,18 @@ public class MutantsGenerator {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return
 	 */
 	public String nextMutantVariableName() {
 
 		String mutantVariable = buildMutantVariableName(this.currentClassFQN, this.mutantsCounterGlobal++);
-		
+
 		if (this.mutantsPerClass.get(this.currentClassFQN) == null) {
 			this.mutantsPerClass.put(this.currentClassFQN, new ArrayList<>());
 		}
 		this.mutantsPerClass.get(this.currentClassFQN).add(mutantVariable.toString());
-		
+
 		return mutantVariable;
 	}
 
@@ -234,12 +259,12 @@ public class MutantsGenerator {
 //		mutantName.append(simplify(classFQN));
 		mutantName.append(Constants.MUTANT_VARIABLE_PREFIX2);
 		mutantName.append(mutSeq);
-		
+
 		return mutantName.toString();
 	}
 
 	public void mutateSourceFolders(List<String> inputPaths, List<String> outputPaths, String catalogueAndGroupPath) {
-		
+
 		this.mutantsCounterGlobal = 0;
 
 		long ini = System.currentTimeMillis();
@@ -252,7 +277,7 @@ public class MutantsGenerator {
 		IO.saveGroupsOfMutants(catalogueAndGroupPath, Constants.GROUPS_OF_MUTANTS_FILE_NAME, this.groupsOfMutants);
 
 		long fin = System.currentTimeMillis();
-		
+
 		System.out.print("\n>>>>> " + this.mutantsCounterGlobal + " mutants seeded");
 		System.out.println(" in " + (fin - ini) + "ms");
 	}
