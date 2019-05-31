@@ -49,7 +49,8 @@ public class Main {
 		}
 
 //		MutationStrategy mutStrategy = new AllBinaryExprMutationStrategy();
-		MutationStrategy mutStrategy = new AllBinaryExprSchemataLibMutationStrategy();
+//		MutationStrategy mutStrategy = new AllBinaryExprSchemataLibMutationStrategy();
+		MutationStrategy mutStrategy = new AllBinaryExprSchemataLibMutationStrategy(true);
 
 		MutantsGenerator mg = new MutantsGenerator();
 		mg.setAllPossibleMutationsPerChangePoint(true);

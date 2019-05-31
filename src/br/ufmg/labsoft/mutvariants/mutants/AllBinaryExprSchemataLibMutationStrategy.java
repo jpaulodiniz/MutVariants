@@ -22,6 +22,12 @@ import br.ufmg.labsoft.mutvariants.util.JavaBinaryOperatorsGroups;
 public class AllBinaryExprSchemataLibMutationStrategy extends AllBinaryExprMutationStrategy {
 
 	/**
+	 * generate mutants by LCR using ternary operator (default format)
+	 * instead of a call to a SchemataLibMethod   
+	 */
+	private boolean ternaryOperatorLCR = false;
+
+	/**
 	 * 
 	 * @author jpaulo
 	 *
@@ -47,7 +53,15 @@ public class AllBinaryExprSchemataLibMutationStrategy extends AllBinaryExprMutat
             return (result != null) ? result : false;
 		}
 	};
-		
+
+	public AllBinaryExprSchemataLibMutationStrategy() {
+		this(false);
+	}
+
+	public AllBinaryExprSchemataLibMutationStrategy(boolean ternaryOperatorLCR) {
+		this.ternaryOperatorLCR = ternaryOperatorLCR;
+	}
+
 	/**
 	 * @author jpaulo
 	 * expressions like <code>obj != null && obj.something()</code> and
@@ -104,8 +118,8 @@ public class AllBinaryExprSchemataLibMutationStrategy extends AllBinaryExprMutat
 
 		if (mOperators == null || mOperators.isEmpty()) return null;
 
-		//TODO LCR original mutation with ternary operator
-		if (JavaBinaryOperatorsGroups.logicalOperators.contains(original.getOperator())) { // && ||
+		if (JavaBinaryOperatorsGroups.logicalOperators.contains(original.getOperator()) // && ||
+				&& this.ternaryOperatorLCR) {
 			return super.mutateBinaryExpression(original, mGen);
 		}
 
