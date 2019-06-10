@@ -5,7 +5,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Random;
 
-import br.ufmg.labsoft.mutvariants.entity.MutantInfo;
+import br.ufmg.labsoft.mutvariants.entity.MutationInfo;
 import br.ufmg.labsoft.mutvariants.util.JavaBinaryOperatorsGroups;
 import br.ufmg.labsoft.mutvariants.util.TypeUtil;
 
@@ -132,10 +132,10 @@ public abstract class BinaryExprMutationStrategy implements MutationStrategy {
 			groupOfMutants.add(mutantVariableName);
 
 			//generation mutant information for mutants catalog
-			MutantInfo mInfo = new MutantInfo();
+			MutationInfo mInfo = new MutationInfo();
 			mInfo.setMutantVariableName(mutantVariableName);
-			mInfo.setOriginaBinaryOperator(original.getOperator().asString());
-			mInfo.setMutatedBinaryOperator(op.asString());
+			mInfo.setInfoBeforeMutation(original.getOperator().asString());
+			mInfo.setInfoAfterMutation(op.asString());
 			mInfo.setMutatedClass(mGen.currentClassFQN);
 			mInfo.setMutatedMethod(mGen.currentMethod);
 			mGen.addMutantInfoToCatalog(mInfo);

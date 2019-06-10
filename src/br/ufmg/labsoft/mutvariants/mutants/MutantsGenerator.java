@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import br.ufmg.labsoft.mutvariants.entity.MutantInfo;
+import br.ufmg.labsoft.mutvariants.entity.MutationInfo;
 import br.ufmg.labsoft.mutvariants.util.Constants;
 import br.ufmg.labsoft.mutvariants.util.IO;
 
@@ -41,7 +41,7 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeS
  */
 public class MutantsGenerator {
 
-	private List<MutantInfo> mutantsCatalog; //Issue #3
+	private List<MutationInfo> mutantsCatalog; //Issue #3
 	private List<List<String>> groupsOfMutants; //Issue #4
 
 	@Deprecated
@@ -117,7 +117,7 @@ public class MutantsGenerator {
 	/**
 	 * Issue #3
 	 */
-	public void addMutantInfoToCatalog(MutantInfo mutantInfo) {
+	public void addMutantInfoToCatalog(MutationInfo mutantInfo) {
 
 		this.mutantsCatalog.add(mutantInfo);
 	}

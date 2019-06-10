@@ -28,4 +28,9 @@ public class LCR extends BinaryExpressionOperatorReplacement {
 
 		return false;
 	}
+
+	@Override
+	public String getName() {
+		return "LCR";
+	}
 }

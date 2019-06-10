@@ -19,6 +19,7 @@ import com.github.javaparser.ast.stmt.WhileStmt;
 import com.google.common.collect.Sets;
 
 import br.ufmg.labsoft.mutvariants.core.MutantsGenerator;
+import br.ufmg.labsoft.mutvariants.entity.MutationInfo;
 
 /*
  * http://www.javadoc.io/doc/com.github.javaparser/javaparser-core/3.9.0
@@ -69,7 +70,6 @@ public class SBR implements MutationOperator {
 	private IfStmt generateMutants(Statement stmt, MutantsGenerator mGen) {
 
 		Statement originalStmt = stmt.clone(); 
-
 		String mutantVariableName = mGen.nextMutantVariableName();
 
 		//!_mut#
@@ -80,6 +80,28 @@ public class SBR implements MutationOperator {
 		IfStmt mutIfStmt = new IfStmt(mutExpr, 
 				new BlockStmt(NodeList.nodeList(originalStmt)), null);
 
+		//generation mutant information for mutants catalog
+		MutationInfo mInfo = new MutationInfo();
+		mInfo.setMutationOperator(this.getName());
+		mInfo.setMutantVariableName(mutantVariableName);
+		mInfo.setInfoBeforeMutation(this.extractStatementClassName(stmt));
+		mInfo.setInfoAfterMutation("removal");
+		mInfo.setMutatedClass(mGen.currentClassFQN);
+		mInfo.setMutatedMethod(mGen.currentMethod);
+		mGen.addMutantInfoToCatalog(mInfo);
+
 		return mutIfStmt;
+	}
+	
+	private String extractStatementClassName(Statement stmt) {
+		
+		String className = stmt.getClass().getName();
+		int idx = className.lastIndexOf('.') + 1;
+		return className.substring(idx);
+	}
+
+	@Override
+	public String getName() {
+		return "SBR";
 	}
 }

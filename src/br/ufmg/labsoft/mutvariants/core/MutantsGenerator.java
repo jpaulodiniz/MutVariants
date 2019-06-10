@@ -21,7 +21,7 @@ import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.PrimitiveType.Primitive;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 
-import br.ufmg.labsoft.mutvariants.entity.MutantInfo;
+import br.ufmg.labsoft.mutvariants.entity.MutationInfo;
 import br.ufmg.labsoft.mutvariants.mutops.MutationOperator;
 import br.ufmg.labsoft.mutvariants.util.Constants;
 import br.ufmg.labsoft.mutvariants.util.IO;
@@ -44,7 +44,7 @@ public class MutantsGenerator {
 	private Set<MutationOperator> mutationOperators;
 	private MutationVisitor mutationVisitor;
 
-	private List<MutantInfo> mutantsCatalog; //Issue #3
+	private List<MutationInfo> mutantsCatalog; //Issue #3
 	private List<List<String>> groupsOfMutants; //Issue #4
 
 	private Map<String, List<String>> mutantsPerClass; //key: class FQN; value: list of mutants
@@ -112,7 +112,7 @@ public class MutantsGenerator {
 	/**
 	 * Issue #3
 	 */
-	public void addMutantInfoToCatalog(MutantInfo mutantInfo) {
+	public void addMutantInfoToCatalog(MutationInfo mutantInfo) {
 
 		this.mutantsCatalog.add(mutantInfo);
 	}

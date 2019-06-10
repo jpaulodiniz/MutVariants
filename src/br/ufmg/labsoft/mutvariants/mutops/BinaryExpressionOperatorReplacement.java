@@ -14,7 +14,7 @@ import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
 
-import br.ufmg.labsoft.mutvariants.entity.MutantInfo;
+import br.ufmg.labsoft.mutvariants.entity.MutationInfo;
 import br.ufmg.labsoft.mutvariants.core.MutantsGenerator;
 
 public abstract class BinaryExpressionOperatorReplacement implements MutationOperator {
@@ -79,10 +79,11 @@ public abstract class BinaryExpressionOperatorReplacement implements MutationOpe
 			groupOfMutants.add(mutantVariableName);
 
 			//generation mutant information for mutants catalog
-			MutantInfo mInfo = new MutantInfo();
+			MutationInfo mInfo = new MutationInfo();
 			mInfo.setMutantVariableName(mutantVariableName);
-			mInfo.setOriginaBinaryOperator(original.getOperator().asString());
-			mInfo.setMutatedBinaryOperator(op.asString());
+			mInfo.setMutationOperator(this.getName());
+			mInfo.setInfoBeforeMutation(original.getOperator().asString());
+			mInfo.setInfoAfterMutation(op.asString());
 			mInfo.setMutatedClass(mGen.currentClassFQN);
 			mInfo.setMutatedMethod(mGen.currentMethod);
 			mGen.addMutantInfoToCatalog(mInfo);

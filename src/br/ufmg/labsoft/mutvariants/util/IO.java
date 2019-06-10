@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import br.ufmg.labsoft.mutvariants.entity.MutantInfo;
+import br.ufmg.labsoft.mutvariants.entity.MutationInfo;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -159,7 +159,7 @@ public class IO {
 	 * @param mutantsCatalog
 	 */
 	public static void saveMutantsCatalog(String outputPath, String fileName,
-			List<MutantInfo> mutantsCatalog) {
+			List<MutationInfo> mutantsCatalog) {
 		
 		if (mutantsCatalog == null || mutantsCatalog.isEmpty()) return;
 		
@@ -167,10 +167,10 @@ public class IO {
 			FileWriter fw = new FileWriter(new File(outputPath, fileName));
 			BufferedWriter bw = new BufferedWriter(fw);
 			
-			bw.write(MutantInfo.infoHeader());
+			bw.write(MutationInfo.infoHeader());
 			bw.newLine();
 			
-			for (MutantInfo mInfo : mutantsCatalog) {
+			for (MutationInfo mInfo : mutantsCatalog) {
 				bw.write(mInfo.toString());
 				bw.newLine();
 			}

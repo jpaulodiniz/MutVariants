@@ -49,4 +49,9 @@ public class ROR extends BinaryExpressionOperatorReplacement {
 
 		return false;
 	}
+
+	@Override
+	public String getName() {
+		return "ROR";
+	}
 }

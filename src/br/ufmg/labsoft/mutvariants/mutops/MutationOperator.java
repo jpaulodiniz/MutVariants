@@ -9,4 +9,6 @@ public interface MutationOperator {
 	public boolean isChangePoint(Node node, MutantsGenerator mGen);
 
 	public Node generateMutants(Node original, MutantsGenerator mGen);
+	
+	public String getName();
 }

@@ -41,4 +41,9 @@ public class AOR extends BinaryExpressionOperatorReplacement {
 		
 		return false;
 	}
+
+	@Override
+	public String getName() {
+		return "AOR";
+	}
 }
