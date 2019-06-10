@@ -1,10 +1,11 @@
 package br.ufmg.labsoft.mutvariants.core;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.stmt.DoStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
@@ -19,6 +20,7 @@ import br.ufmg.labsoft.mutvariants.mutops.MutationOperator;
 
 class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 
+	@Deprecated
 	public void defaultMutationVisiting(Node node, MutantsGenerator mGen) {
 		
 		//check whether expr is a change point
@@ -55,16 +57,27 @@ class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 		//mutate
 		mGen.generateMutants(node, mutOps);
 	}
-	
+
+	@Override
+	public void visit(MethodDeclaration methodDecl, MutantsGenerator mGen) {
+		mGen.currentMethod = methodDecl.getNameAsString() + "_" + methodDecl.getBegin().get().line;
+		super.visit(methodDecl, mGen);
+	}
+
+	@Override
+	public void visit(ConstructorDeclaration constrDecl, MutantsGenerator mGen) {
+		mGen.currentMethod = constrDecl.getNameAsString() + "_" + constrDecl.getBegin().get().line;
+		super.visit(constrDecl, mGen);
+	}
+
 	@Override
 	public void visit(BinaryExpr expr, MutantsGenerator mGen) {
-//		//check whether expr is a change point
-//		List<MutationOperator> mutOps = mGen.checkChangePoint(expr);
-//		//keep visiting
-//		super.visit(expr, mGen);
-//		//mutate
-//		mGen.generateMutants(expr, mutOps);
-		this.defaultMutationVisiting(expr, mGen);
+		//check whether expr is a change point
+		List<MutationOperator> mutOps = mGen.checkChangePoint(expr);
+		//keep visiting
+		super.visit(expr, mGen);
+		//mutate
+		mGen.generateMutants(expr, mutOps);
 	}
 
 	@Override

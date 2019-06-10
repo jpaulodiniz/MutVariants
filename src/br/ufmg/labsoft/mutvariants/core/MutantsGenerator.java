@@ -260,8 +260,6 @@ public class MutantsGenerator {
 		System.out.print(" in " + countMutatedCompilationUnits + " mutated compilation units");
 		System.out.println(", in " + (fin - ini) + "ms");
 	
-		System.out.println(">>>>> Mutants Mapping:\n" + this.mutantsPerClass);
-//		IO.saveMutantsCatalog(outputPath, Constants.MUT_CATALOG_FILE_NAME, this.mutantsPerClass);
 		IO.saveMutantsCatalog(outputPath, Constants.MUT_CATALOG_FILE_NAME, this.mutantsCatalog);
 		IO.saveGroupsOfMutants(outputPath, Constants.GROUPS_OF_MUTANTS_FILE_NAME, this.groupsOfMutants);
 	}
