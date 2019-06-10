@@ -43,6 +43,13 @@ public class SBR implements MutationOperator {
 					(node instanceof ExpressionStmt && 
 							!(ExpressionStmt.class.cast(node).getExpression() 
 									instanceof VariableDeclarationExpr)) ) {
+				
+				// nested 'else if' blocks are not mutated
+				if (node instanceof IfStmt &&
+						node.getParentNode().get() instanceof IfStmt) {
+					return false;
+				}
+				
 				return true;
 			}
 		}
