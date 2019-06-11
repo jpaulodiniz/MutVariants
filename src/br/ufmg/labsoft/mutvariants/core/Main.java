@@ -2,18 +2,15 @@ package br.ufmg.labsoft.mutvariants.core;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Properties;
 
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.expr.BinaryExpr.Operator;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JarTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 
-import br.ufmg.labsoft.mutvariants.mutants.BinaryExprMutationStrategy;
 import br.ufmg.labsoft.mutvariants.mutops.AOR;
 import br.ufmg.labsoft.mutvariants.mutops.LCR;
 import br.ufmg.labsoft.mutvariants.mutops.MutationOperator;
@@ -67,9 +64,9 @@ public class Main {
 		mg.setMutationRate(1d);
 		mg.setTypeSolver(typeSolvers);
 
-//		mg.mutatePackageOrDirectory(inputDir, outputDir);
+		mg.mutatePackageOrDirectory(inputDir, outputDir);
 
-		testMutateOneClass(mg);
+//		testMutateOneClass(mg);
 	}
 
 	@Deprecated
@@ -86,21 +83,5 @@ public class Main {
 		System.out.println();
 		System.out.println(" *** ORIGINAL ***\n\n" + original);
 		System.out.println("\n *** MUTATED ***\n\n" + mutated);
-	}
-
-	public static void testMutatingJavaOperators() {
-
-		main_loop:
-		for (Operator op : EnumSet.allOf(Operator.class)) {
-			System.out.println();
-			for (int i = 0; i < 3; ++i) {
-				try {
-					System.out.println(op + " into " + BinaryExprMutationStrategy.operatorForMutation(op, false));
-				} catch (Exception e) {
-					System.err.println(e.getMessage());
-					continue main_loop;
-				}
-			}
-		}
 	}
 }
