@@ -210,4 +210,37 @@ public class IO {
 			e.printStackTrace();
 		}
 	}
+
+	/**
+	 * Issue #2
+	 * @param outputPath
+	 * @param nestedMutantsInfoFileName
+	 * @param nestedMutantInfo
+	 */
+	public static void saveNestedMutantsInfo(String outputPath, String fileName, 
+			Map<String, List<String>> nestedMutantInfo) {
+		
+		if (nestedMutantInfo == null || nestedMutantInfo.isEmpty()) return;
+
+		try {
+			FileWriter fw = new FileWriter(new File(outputPath, fileName));
+			BufferedWriter bw = new BufferedWriter(fw);
+			
+			for (Entry<String, List<String>> entry : nestedMutantInfo.entrySet()) {
+				bw.write(entry.getKey());
+				bw.write(":");
+				
+				for (String mut : entry.getValue()) {
+					bw.write(" ");
+					bw.write(mut);
+				}
+
+				bw.newLine();
+			}
+			bw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
 }

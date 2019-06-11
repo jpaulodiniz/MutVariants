@@ -33,6 +33,11 @@ public class Constants {
 	public static final String GROUPS_OF_MUTANTS_FILE_NAME = "groups-of-mutants.txt";
 
 	/**
+	 * Issue #2
+	 */
+	public static final String NESTED_MUTANTS_INFO_FILE_NAME = "nested-mutants.txt";
+
+	/**
 	 * Issue #1
 	 * FQN class containing methods for mutation operators in binary expressions
 	 */

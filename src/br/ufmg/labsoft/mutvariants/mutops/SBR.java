@@ -1,6 +1,9 @@
 package br.ufmg.labsoft.mutvariants.mutops;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
@@ -20,6 +23,7 @@ import com.google.common.collect.Sets;
 
 import br.ufmg.labsoft.mutvariants.core.MutantsGenerator;
 import br.ufmg.labsoft.mutvariants.entity.MutationInfo;
+import br.ufmg.labsoft.mutvariants.util.Constants;
 
 /*
  * http://www.javadoc.io/doc/com.github.javaparser/javaparser-core/3.9.0
@@ -35,6 +39,7 @@ public class SBR implements MutationOperator {
 			Sets.newHashSet(IfStmt.class, WhileStmt.class, ForStmt.class, 
 					ForeachStmt.class, DoStmt.class, SwitchStmt.class);
 
+	@Override
 	public boolean isChangePoint(Node node, MutantsGenerator mGen) {
 
 		if (node instanceof Statement) {
@@ -96,10 +101,26 @@ public class SBR implements MutationOperator {
 		mInfo.setMutatedClass(mGen.currentClassFQN);
 		mInfo.setMutatedMethod(mGen.currentMethod);
 		mGen.addMutantInfoToCatalog(mInfo);
+		
+		List<String> nested = this.findNestedMutantNames(stmt);
+		if (!nested.isEmpty()) {
+			mGen.addNestedMutantsInfo(mutantVariableName, nested);
+		}
 
 		return mutIfStmt;
 	}
 	
+	/**
+	 * nested mutant variable names nested in current block 'being removed'
+	 * @param stmt
+	 * @return
+	 */
+	private List<String> findNestedMutantNames(Statement stmt) {
+		return stmt.findAll(NameExpr.class).stream()
+				.filter( x -> x.getNameAsString().startsWith(Constants.MUTANT_VARIABLE_PREFIX2 ))
+				.map(x -> x.toString()).collect(Collectors.toList());
+	}
+
 	private String extractStatementClassName(Statement stmt) {
 		
 		String className = stmt.getClass().getName();

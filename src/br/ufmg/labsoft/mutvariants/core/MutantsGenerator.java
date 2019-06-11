@@ -46,6 +46,7 @@ public class MutantsGenerator {
 
 	private List<MutationInfo> mutantsCatalog; //Issue #3
 	private List<List<String>> groupsOfMutants; //Issue #4
+	private Map<String, List<String>> nestedMutantInfo; //Issue #2
 
 	private Map<String, List<String>> mutantsPerClass; //key: class FQN; value: list of mutants
 	public String currentClassFQN; //helper field: current class fully qualified name (FQN)
@@ -65,9 +66,9 @@ public class MutantsGenerator {
 		this.mutationOperators = new HashSet<>();
 		this.mutationVisitor = new MutationVisitor();
 		this.mutantsPerClass = new HashMap<>();
-		this.mutationOperators = new HashSet<>();
 		this.mutantsCatalog = new ArrayList<>();
 		this.groupsOfMutants = new ArrayList<>();
+		this.nestedMutantInfo = new HashMap<>();
 	}
 
 	public boolean isAllPossibleMutationsPerChangePoint() {
@@ -262,6 +263,7 @@ public class MutantsGenerator {
 	
 		IO.saveMutantsCatalog(outputPath, Constants.MUT_CATALOG_FILE_NAME, this.mutantsCatalog);
 		IO.saveGroupsOfMutants(outputPath, Constants.GROUPS_OF_MUTANTS_FILE_NAME, this.groupsOfMutants);
+		IO.saveNestedMutantsInfo(outputPath, Constants.NESTED_MUTANTS_INFO_FILE_NAME, this.nestedMutantInfo);
 	}
 
 	/**
@@ -273,7 +275,7 @@ public class MutantsGenerator {
 	
 		List<MutationOperator> availableMutOps = new ArrayList<>();
 	
-		for (MutationOperator mutOp : mutationOperators) {
+		for (MutationOperator mutOp : this.mutationOperators) {
 			if (mutOp.isChangePoint(node, this)) {
 				availableMutOps.add(mutOp);
 			}
@@ -296,5 +298,9 @@ public class MutantsGenerator {
 				}
 			}
 		}
+	}
+
+	public void addNestedMutantsInfo(String mutantVariableName, List<String> nestedMutants) {
+		this.nestedMutantInfo.put(mutantVariableName, nestedMutants);
 	}
 }
