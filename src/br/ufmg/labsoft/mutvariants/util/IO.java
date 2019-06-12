@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 
 import br.ufmg.labsoft.mutvariants.entity.MutationInfo;
 
@@ -218,7 +219,7 @@ public class IO {
 	 * @param nestedMutantInfo
 	 */
 	public static void saveNestedMutantsInfo(String outputPath, String fileName, 
-			Map<String, List<String>> nestedMutantInfo) {
+			Map<String, Set<String>> nestedMutantInfo) {
 		
 		if (nestedMutantInfo == null || nestedMutantInfo.isEmpty()) return;
 
@@ -226,7 +227,7 @@ public class IO {
 			FileWriter fw = new FileWriter(new File(outputPath, fileName));
 			BufferedWriter bw = new BufferedWriter(fw);
 			
-			for (Entry<String, List<String>> entry : nestedMutantInfo.entrySet()) {
+			for (Entry<String, Set<String>> entry : nestedMutantInfo.entrySet()) {
 				bw.write(entry.getKey());
 				bw.write(":");
 				

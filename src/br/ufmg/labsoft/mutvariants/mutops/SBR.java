@@ -102,7 +102,7 @@ public class SBR implements MutationOperator {
 		mInfo.setMutatedMethod(mGen.currentMethod);
 		mGen.addMutantInfoToCatalog(mInfo);
 		
-		List<String> nested = this.findNestedMutantNames(stmt);
+		Set<String> nested = this.findNestedMutantNames(stmt);
 		if (!nested.isEmpty()) {
 			mGen.addNestedMutantsInfo(mutantVariableName, nested);
 		}
@@ -115,10 +115,10 @@ public class SBR implements MutationOperator {
 	 * @param stmt
 	 * @return
 	 */
-	private List<String> findNestedMutantNames(Statement stmt) {
+	private Set<String> findNestedMutantNames(Statement stmt) {
 		return stmt.findAll(NameExpr.class).stream()
 				.filter( x -> x.getNameAsString().startsWith(Constants.MUTANT_VARIABLE_PREFIX2 ))
-				.map(x -> x.toString()).collect(Collectors.toList());
+				.map(x -> x.toString()).collect(Collectors.toSet());
 	}
 
 	private String extractStatementClassName(Statement stmt) {

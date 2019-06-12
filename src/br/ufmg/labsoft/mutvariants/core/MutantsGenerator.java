@@ -9,6 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import br.ufmg.labsoft.mutvariants.entity.MutationInfo;
+import br.ufmg.labsoft.mutvariants.mutops.MutationOperator;
+import br.ufmg.labsoft.mutvariants.util.Constants;
+import br.ufmg.labsoft.mutvariants.util.IO;
+
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
@@ -20,11 +25,6 @@ import com.github.javaparser.ast.expr.BooleanLiteralExpr;
 import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.PrimitiveType.Primitive;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
-
-import br.ufmg.labsoft.mutvariants.entity.MutationInfo;
-import br.ufmg.labsoft.mutvariants.mutops.MutationOperator;
-import br.ufmg.labsoft.mutvariants.util.Constants;
-import br.ufmg.labsoft.mutvariants.util.IO;
 
 /*
  * TODO(s)
@@ -46,7 +46,7 @@ public class MutantsGenerator {
 
 	private List<MutationInfo> mutantsCatalog; //Issue #3
 	private List<List<String>> groupsOfMutants; //Issue #4
-	private Map<String, List<String>> nestedMutantInfo; //Issue #2
+	private Map<String, Set<String>> nestedMutantInfo; //Issue #2
 
 	private Map<String, List<String>> mutantsPerClass; //key: class FQN; value: list of mutants
 	public String currentClassFQN; //helper field: current class fully qualified name (FQN)
@@ -299,7 +299,7 @@ public class MutantsGenerator {
 		}
 	}
 
-	public void addNestedMutantsInfo(String mutantVariableName, List<String> nestedMutants) {
+	public void addNestedMutantsInfo(String mutantVariableName, Set<String> nestedMutants) {
 		this.nestedMutantInfo.put(mutantVariableName, nestedMutants);
 	}
 }
