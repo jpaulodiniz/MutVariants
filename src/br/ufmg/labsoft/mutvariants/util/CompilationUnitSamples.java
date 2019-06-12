@@ -30,7 +30,6 @@ public class CompilationUnitSamples {
 				+ "  }"
 				+ " }"
 				+ " public void method2(int a) {"
-				//+ "  if (c) {"
 				+ "  if (a < 0 || a > 10) {"
 				+ "   System.out.println(\"Out of bounds\" + a - CONST);"
 				+ "   return;"
@@ -40,6 +39,8 @@ public class CompilationUnitSamples {
 				+ "   System.out.println(b);"
 				+ "   b++;"
 				+ "  }"
+				+ "  for (;;)"
+				+ "   b++;"
 				+ " }"
 				+ "}");
 

@@ -250,9 +250,8 @@ public class MutantsGenerator {
 
 			if (mutated.getImports().stream().anyMatch(i -> i.getNameAsString().startsWith(Constants.VAREXJ_CONDITIONAL_FQN))) {
 				++countMutatedCompilationUnits;
+				IO.writeCompilationUnit(mutated, new File(outputPath));
 			}
-
-			IO.writeCompilationUnit(mutated, new File(outputPath));
 		}
 
 		long fin = System.currentTimeMillis();
