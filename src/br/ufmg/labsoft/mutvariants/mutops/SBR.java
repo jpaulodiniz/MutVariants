@@ -1,7 +1,5 @@
 package br.ufmg.labsoft.mutvariants.mutops;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -20,6 +18,7 @@ import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.SwitchStmt;
 import com.github.javaparser.ast.stmt.WhileStmt;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.Service.State;
 
 import br.ufmg.labsoft.mutvariants.core.MutantsGenerator;
 import br.ufmg.labsoft.mutvariants.entity.MutationInfo;
@@ -77,13 +76,13 @@ public class SBR implements MutationOperator {
 	 * 
 	 * @param stmt
 	 * @param mGen
-	 * @return
+	 * @return IfStatement or BlockStatement 
 	 */
-	private IfStmt generateMutants(Statement stmt, MutantsGenerator mGen) {
+	private Statement generateMutants(Statement stmt, MutantsGenerator mGen) {
 
 		Statement originalStmt = stmt.clone(); 
 		String mutantVariableName = mGen.nextMutantVariableName();
-
+		
 		//!_mut#
 		UnaryExpr mutExpr = new UnaryExpr(new NameExpr(mutantVariableName), 
 				UnaryExpr.Operator.LOGICAL_COMPLEMENT);
@@ -105,6 +104,18 @@ public class SBR implements MutationOperator {
 		Set<String> nested = this.findNestedMutantNames(stmt);
 		if (!nested.isEmpty()) {
 			mGen.addNestedMutantsInfo(mutantVariableName, nested);
+		}
+
+		/*
+		 * handling issues with code like
+		 * if (cond) expr1; 
+		 * else expr2;
+		 */
+		if (stmt.getParentNode().get() instanceof IfStmt) {
+			IfStmt parent = (IfStmt)stmt.getParentNode().get();
+			if (parent.getElseStmt().isPresent()) {
+				return new BlockStmt(NodeList.nodeList(mutIfStmt));
+			}
 		}
 
 		return mutIfStmt;
