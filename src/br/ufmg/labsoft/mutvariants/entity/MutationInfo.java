@@ -81,11 +81,11 @@ public class MutationInfo {
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append("Mutant Variable Name,");
-//		sb.append("Mutation Operator,");
+		sb.append("Mutation Operator,");
 		sb.append("Mutated Class,");
 		sb.append("Mutated Method,");
-		sb.append("Original Binary Operator,");
-		sb.append("Mutated Binary Operator");
+		sb.append("Before Mutation,");
+		sb.append("After Mutation");
 
 		return sb.toString();
 	}

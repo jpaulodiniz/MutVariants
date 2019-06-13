@@ -59,6 +59,7 @@ public class MutantsGenerator {
 	 */
 	private boolean allPossibleMutationsPerChangePoint = false;
 	private boolean mutateLoopConditions = false;
+	private boolean listenerCallsInstrumentation = false;
 	private double mutationRate = 1d; 
 	private TypeSolver typeSolver;
 
@@ -85,6 +86,14 @@ public class MutantsGenerator {
 
 	public void setMutateLoopConditions(boolean mutateLoopConditions) {
 		this.mutateLoopConditions = mutateLoopConditions;
+	}
+
+	public boolean getListenerCallsInstrumentation() {
+		return listenerCallsInstrumentation;
+	}
+
+	public void setListenerCallsInstrumentation(boolean listenerCallsInstrumentation) {
+		this.listenerCallsInstrumentation = listenerCallsInstrumentation;
 	}
 
 	public double getMutationRate() {
