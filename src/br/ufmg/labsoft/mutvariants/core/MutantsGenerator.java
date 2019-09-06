@@ -146,6 +146,8 @@ public class MutantsGenerator {
 		if (this.currentClassFQN.endsWith("Exception")) {
 			return;
 		}
+		
+		this.currentMethod = null;
 	
 		//strategy
 //		this.getMutStrategy().generateMutants(mClass, this);

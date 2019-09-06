@@ -14,11 +14,11 @@ import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.ForeachStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
+import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.SwitchStmt;
 import com.github.javaparser.ast.stmt.WhileStmt;
 import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.Service.State;
 
 import br.ufmg.labsoft.mutvariants.core.MutantsGenerator;
 import br.ufmg.labsoft.mutvariants.entity.MutationInfo;
@@ -51,6 +51,12 @@ public class SBR implements MutationOperator {
 				// nested 'else if' blocks are not mutated
 				if (node instanceof IfStmt &&
 						node.getParentNode().get() instanceof IfStmt) {
+					return false;
+				}
+
+				if (mGen.currentMethod.endsWith("__nrs") &&
+						blockStatementsToRemove.contains(node.getClass()) &&
+						node.findFirst(ReturnStmt.class).isPresent()) {
 					return false;
 				}
 				

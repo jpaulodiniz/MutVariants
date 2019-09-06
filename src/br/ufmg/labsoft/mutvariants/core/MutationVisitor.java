@@ -3,21 +3,25 @@ package br.ufmg.labsoft.mutvariants.core;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import br.ufmg.labsoft.mutvariants.listeners.ListenerUtil;
-import br.ufmg.labsoft.mutvariants.mutops.MutationOperator;
-
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.stmt.DoStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.ForeachStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
+import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.SwitchStmt;
 import com.github.javaparser.ast.stmt.WhileStmt;
+import com.github.javaparser.ast.type.Type;
+import com.github.javaparser.ast.type.VoidType;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
+
+import br.ufmg.labsoft.mutvariants.listeners.ListenerUtil;
+import br.ufmg.labsoft.mutvariants.mutops.MutationOperator;
 
 class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 
@@ -62,6 +66,21 @@ class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 	@Override
 	public void visit(MethodDeclaration methodDecl, MutantsGenerator mGen) {
 		mGen.currentMethod = methodDecl.getNameAsString() + "_" + methodDecl.getBegin().get().line;
+		
+		Type returnType = methodDecl.getType();
+		boolean retSafe = true;
+		
+		if (!(returnType instanceof VoidType)) { // function
+			
+			// has a return statement as direct child
+			retSafe = methodDecl.getBody().get().getChildNodes().stream()
+					.anyMatch(st -> st instanceof ReturnStmt);
+		}
+
+		if (!retSafe) {
+			mGen.currentMethod += "__nrs";
+		}
+		
 		super.visit(methodDecl, mGen);
 	}
 
@@ -86,6 +105,13 @@ class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 		List<MutationOperator> mutOps = mGen.checkChangePoint(stmt);
 		super.visit(stmt, mGen);
 		mGen.generateMutants(stmt, mutOps);
+	}
+	
+	@Override
+	public void visit(VariableDeclarator vd, MutantsGenerator mGen) {
+		List<MutationOperator> mutOps = mGen.checkChangePoint(vd);
+		super.visit(vd, mGen);
+		mGen.generateMutants(vd, mutOps);
 	}
 
 	@Override
