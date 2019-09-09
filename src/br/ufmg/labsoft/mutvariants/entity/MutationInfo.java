@@ -11,7 +11,7 @@ public class MutationInfo {
 	private String mutationOperator;
 
 	private String mutatedClass;
-	private String mutatedMethod;
+	private String mutatedOperation;
 
 	private String infoBeforeMutation;
 	private String infoAfterMutation;
@@ -40,12 +40,12 @@ public class MutationInfo {
 		this.mutatedClass = mutatedClass;
 	}
 
-	public String getMutatedMethod() {
-		return mutatedMethod;
+	public String getMutatedOperation() {
+		return mutatedOperation;
 	}
 
-	public void setMutatedMethod(String mutatedMethod) {
-		this.mutatedMethod = mutatedMethod;
+	public void setMutatedOperation(String mutatedOperation) {
+		this.mutatedOperation = mutatedOperation;
 	}
 
 	public String getInfoBeforeMutation() {
@@ -70,7 +70,7 @@ public class MutationInfo {
 		sb.append(mutantVariableName).append(',');
 		sb.append(mutationOperator).append(',');
 		sb.append(mutatedClass).append(',');
-		sb.append(mutatedMethod).append(',');
+		sb.append(mutatedOperation).append(',');
 		sb.append(infoBeforeMutation).append(',');
 		sb.append(infoAfterMutation);
 

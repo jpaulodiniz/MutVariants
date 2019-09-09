@@ -85,7 +85,7 @@ public abstract class BinaryExpressionOperatorReplacement implements MutationOpe
 			mInfo.setInfoBeforeMutation(original.getOperator().asString());
 			mInfo.setInfoAfterMutation(op.asString());
 			mInfo.setMutatedClass(mGen.currentClassFQN);
-			mInfo.setMutatedMethod(mGen.currentMethod);
+			mInfo.setMutatedOperation(mGen.currentOperation);
 			mGen.addMutantInfoToCatalog(mInfo);
 
 			mutantExpressionTemp = new ConditionalExpr(

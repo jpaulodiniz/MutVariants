@@ -54,7 +54,7 @@ public class SBR implements MutationOperator {
 					return false;
 				}
 
-				if (mGen.currentMethod.endsWith("__nrs") &&
+				if (mGen.currentOperation.endsWith("__nrs") &&
 						blockStatementsToRemove.contains(node.getClass()) &&
 						node.findFirst(ReturnStmt.class).isPresent()) {
 					return false;
@@ -104,7 +104,7 @@ public class SBR implements MutationOperator {
 		mInfo.setInfoBeforeMutation(this.extractStatementClassName(stmt));
 		mInfo.setInfoAfterMutation("removal");
 		mInfo.setMutatedClass(mGen.currentClassFQN);
-		mInfo.setMutatedMethod(mGen.currentMethod);
+		mInfo.setMutatedOperation(mGen.currentOperation);
 		mGen.addMutantInfoToCatalog(mInfo);
 		
 		Set<String> nested = this.findNestedMutantNames(stmt);

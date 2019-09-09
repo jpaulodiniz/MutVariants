@@ -65,7 +65,7 @@ class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 
 	@Override
 	public void visit(MethodDeclaration methodDecl, MutantsGenerator mGen) {
-		mGen.currentMethod = methodDecl.getNameAsString() + "_" + methodDecl.getBegin().get().line;
+		mGen.currentOperation = methodDecl.getNameAsString() + "_" + methodDecl.getBegin().get().line;
 		
 		Type returnType = methodDecl.getType();
 		boolean retSafe = true;
@@ -78,7 +78,7 @@ class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 		}
 
 		if (!retSafe) {
-			mGen.currentMethod += "__nrs";
+			mGen.currentOperation += "__nrs";
 		}
 		
 		super.visit(methodDecl, mGen);
@@ -86,7 +86,7 @@ class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 
 	@Override
 	public void visit(ConstructorDeclaration constrDecl, MutantsGenerator mGen) {
-		mGen.currentMethod = constrDecl.getNameAsString() + "_" + constrDecl.getBegin().get().line;
+		mGen.currentOperation = constrDecl.getNameAsString() + "_" + constrDecl.getBegin().get().line;
 		super.visit(constrDecl, mGen);
 	}
 

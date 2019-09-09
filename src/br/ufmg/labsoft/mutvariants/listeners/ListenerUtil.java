@@ -101,7 +101,7 @@ public class ListenerUtil {
 		//TODO dinamically retrieve the listener object instantiated in this class
 		MethodCallExpr listenerCall = new MethodCallExpr(new NameExpr("br.ufmg.labsoft.util.ListenerUtil.listener"), 
 				"listen", 
-				NodeList.nodeList(new StringLiteralExpr(mGen.currentClassFQN + "." + mGen.currentMethod)));
+				NodeList.nodeList(new StringLiteralExpr(mGen.currentClassFQN + "." + mGen.currentOperation)));
 
 		blockStmt.addStatement(position, listenerCall);
 	}

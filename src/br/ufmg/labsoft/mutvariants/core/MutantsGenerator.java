@@ -50,7 +50,7 @@ public class MutantsGenerator {
 
 	private Map<String, List<String>> mutantsPerClass; //key: class FQN; value: list of mutants
 	public String currentClassFQN; //helper field: current class fully qualified name (FQN)
-	public String currentMethod; //helper field: Issue #3
+	public String currentOperation; //helper field - method or constructor - Issue #3
 	private long mutantsCounterGlobal; //helper field
 
 	/**
@@ -147,7 +147,7 @@ public class MutantsGenerator {
 			return;
 		}
 		
-		this.currentMethod = null;
+		this.currentOperation = null;
 	
 		//strategy
 //		this.getMutStrategy().generateMutants(mClass, this);
@@ -165,15 +165,6 @@ public class MutantsGenerator {
 
 			FieldDeclaration fieldDecl = new FieldDeclaration(EnumSet.of(Modifier.PUBLIC, Modifier.STATIC), variables);
 			fieldDecl.addMarkerAnnotation(Constants.VAREXJ_CONDITIONAL_NAME);
-
-//			NodeList<AnnotationExpr> annotations = new NodeList<>();
-//			annotations.add(new MarkerAnnotationExpr(Constants.VAREXJ_CONDITIONAL_NAME));
-//			FieldDeclaration fieldDecl2 = new FieldDeclaration(EnumSet.of(Modifier.PUBLIC, Modifier.STATIC),
-//					annotations, variables);
-
-//			FieldDeclaration fieldDecl3 = c.addFieldWithInitializer(
-//					new PrimitiveType(Primitive.BOOLEAN), Constants.MUTANT_VARIABLE_PREFIX, new BooleanLiteralExpr(false),
-//					Modifier.PUBLIC, Modifier.STATIC);
 
 			mClass.getMembers().add(0, fieldDecl);	
 		}
