@@ -54,12 +54,13 @@ public class SBR implements MutationOperator {
 					return false;
 				}
 
-				if (mGen.currentOperation.endsWith("__nrs") &&
+				if (mGen.currentOperation != null && // static block, etc...
+						mGen.currentOperation.endsWith("__nrs") &&
 						blockStatementsToRemove.contains(node.getClass()) &&
 						node.findFirst(ReturnStmt.class).isPresent()) {
 					return false;
 				}
-				
+
 				return true;
 			}
 		}

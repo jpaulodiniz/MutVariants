@@ -3,6 +3,7 @@ package br.ufmg.labsoft.mutvariants.core;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -65,13 +66,18 @@ class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 
 	@Override
 	public void visit(MethodDeclaration methodDecl, MutantsGenerator mGen) {
-		mGen.currentOperation = methodDecl.getNameAsString() + "_" + methodDecl.getBegin().get().line;
 		
+		if (!methodDecl.getBody().isPresent()) { // not abstract, not default in an interface
+			return;
+		}
+
+		mGen.currentOperation = methodDecl.getNameAsString() + "_" + methodDecl.getBegin().get().line;
+
 		Type returnType = methodDecl.getType();
 		boolean retSafe = true;
 		
 		if (!(returnType instanceof VoidType)) { // function
-			
+
 			// has a return statement as direct child
 			retSafe = methodDecl.getBody().get().getChildNodes().stream()
 					.anyMatch(st -> st instanceof ReturnStmt);
@@ -80,14 +86,16 @@ class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 		if (!retSafe) {
 			mGen.currentOperation += "__nrs";
 		}
-		
+
 		super.visit(methodDecl, mGen);
+		mGen.currentOperation = null;
 	}
 
 	@Override
 	public void visit(ConstructorDeclaration constrDecl, MutantsGenerator mGen) {
 		mGen.currentOperation = constrDecl.getNameAsString() + "_" + constrDecl.getBegin().get().line;
 		super.visit(constrDecl, mGen);
+		mGen.currentOperation = null;
 	}
 
 	@Override
