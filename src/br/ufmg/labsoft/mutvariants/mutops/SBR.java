@@ -1,10 +1,13 @@
 package br.ufmg.labsoft.mutvariants.mutops;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.expr.AssignExpr;
+import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.UnaryExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
@@ -48,20 +51,50 @@ public class SBR implements MutationOperator {
 							!(ExpressionStmt.class.cast(node).getExpression() 
 									instanceof VariableDeclarationExpr)) ) {
 				
-				// nested 'else if' blocks are not mutated
+				// nested 'else if' blocks are not removed
 				if (node instanceof IfStmt &&
 						node.getParentNode().get() instanceof IfStmt) {
 					return false;
 				}
 
-				if (mGen.currentOperation != null && // static block, etc...
+				/*
+				 * blocks containing return statements are removed only if there is
+				 * the method has direct return statement as child
+				 */
+				if (mGen.currentOperation != null && // not a static block, etc...
 						mGen.currentOperation.endsWith("__nrs") &&
 						blockStatementsToRemove.contains(node.getClass()) &&
 						node.findFirst(ReturnStmt.class).isPresent()) {
 					return false;
 				}
 
-				return true;
+				/*
+				 * statements/blocks containing the initialization 
+				 * of a final attribute are not removed 
+				 */
+				boolean containsInitializationOfFinalAttr = false;
+				if (mGen.classFinalAttrsNonInitialized != null) {
+					List<AssignExpr> assignExprs = node.findAll(AssignExpr.class).stream()
+							.filter(ae -> ae.getOperator().equals(AssignExpr.Operator.ASSIGN)
+									&& (ae.getTarget().isNameExpr() || ae.getTarget().isFieldAccessExpr())
+									)
+							.collect(Collectors.toList());
+					
+					for (AssignExpr ae : assignExprs) {
+						NameExpr nameExpr = null;
+						if (ae.getTarget().isNameExpr()) {
+							nameExpr = (NameExpr)ae.getTarget();
+						}
+						else if (ae.getTarget().isFieldAccessExpr()) {
+							nameExpr = ((FieldAccessExpr)ae.getTarget()).getNameAsExpression();
+						}
+						
+						containsInitializationOfFinalAttr = 
+								mGen.classFinalAttrsNonInitialized.contains(nameExpr);
+					}
+				}
+				
+				return !containsInitializationOfFinalAttr;
 			}
 		}
 

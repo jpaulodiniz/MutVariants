@@ -8,11 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import br.ufmg.labsoft.mutvariants.entity.MutationInfo;
-import br.ufmg.labsoft.mutvariants.mutops.MutationOperator;
-import br.ufmg.labsoft.mutvariants.util.Constants;
-import br.ufmg.labsoft.mutvariants.util.IO;
+import java.util.stream.Collectors;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
@@ -22,9 +18,15 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.BooleanLiteralExpr;
+import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.PrimitiveType.Primitive;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
+
+import br.ufmg.labsoft.mutvariants.entity.MutationInfo;
+import br.ufmg.labsoft.mutvariants.mutops.MutationOperator;
+import br.ufmg.labsoft.mutvariants.util.Constants;
+import br.ufmg.labsoft.mutvariants.util.IO;
 
 /*
  * TODO(s)
@@ -50,6 +52,9 @@ public class MutantsGenerator {
 
 	private Map<String, List<String>> mutantsPerClass; //key: class FQN; value: list of mutants
 	public String currentClassFQN; //helper field: current class fully qualified name (FQN)
+	
+	public Set<NameExpr> classFinalAttrsNonInitialized = new HashSet<>();
+	
 	public String currentOperation; //helper field - method or constructor - Issue #3
 	private long mutantsCounterGlobal; //helper field
 
@@ -135,6 +140,24 @@ public class MutantsGenerator {
 		this.groupsOfMutants.add(groupOfMutants);
 	}
 
+	private Set<NameExpr> findFinalAttrsNonInitialized(ClassOrInterfaceDeclaration mClass) {
+		Set<NameExpr> finalVariablesNonInitialized = new HashSet<>(); 
+
+		List<FieldDeclaration> finalFields = (mClass.getFields()).stream()
+				.filter(f -> f.getModifiers().contains(Modifier.FINAL))
+				.collect(Collectors.toList());
+
+		for (FieldDeclaration finalField : finalFields) {
+			for (VariableDeclarator vd : finalField.getVariables()) {
+				if (!vd.getInitializer().isPresent()) {
+					finalVariablesNonInitialized.add(vd.getNameAsExpression());
+				}
+			}
+		}
+		
+		return finalVariablesNonInitialized.isEmpty() ? null : finalVariablesNonInitialized;
+	}
+	
 	/**
 	 * @param original
 	 * @return
@@ -146,11 +169,11 @@ public class MutantsGenerator {
 		if (this.currentClassFQN.endsWith("Exception")) {
 			return;
 		}
-		
+
 		this.currentOperation = null;
-	
-		//strategy
-//		this.getMutStrategy().generateMutants(mClass, this);
+
+		this.classFinalAttrsNonInitialized = this.findFinalAttrsNonInitialized(mClass);
+
 		mClass.accept(this.mutationVisitor, this);
 
 		if (this.mutantsPerClass.get(this.currentClassFQN) != null &&
@@ -168,6 +191,8 @@ public class MutantsGenerator {
 
 			mClass.getMembers().add(0, fieldDecl);	
 		}
+
+		this.classFinalAttrsNonInitialized = null;
 	}
 
 	/**
