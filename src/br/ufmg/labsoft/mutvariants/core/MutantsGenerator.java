@@ -53,7 +53,7 @@ public class MutantsGenerator {
 	private Map<String, List<String>> mutantsPerClass; //key: class FQN; value: list of mutants
 	public String currentClassFQN; //helper field: current class fully qualified name (FQN)
 	
-	public Set<NameExpr> classFinalAttrsNonInitialized = new HashSet<>();
+	public Set<NameExpr> classFinalAttrsNonInitialized;
 	
 	public String currentOperation; //helper field - method or constructor - Issue #3
 	private long mutantsCounterGlobal; //helper field
@@ -140,7 +140,7 @@ public class MutantsGenerator {
 		this.groupsOfMutants.add(groupOfMutants);
 	}
 
-	private Set<NameExpr> findFinalAttrsNonInitialized(ClassOrInterfaceDeclaration mClass) {
+	public Set<NameExpr> findFinalAttrsNonInitialized(ClassOrInterfaceDeclaration mClass) {
 		Set<NameExpr> finalVariablesNonInitialized = new HashSet<>(); 
 
 		List<FieldDeclaration> finalFields = (mClass.getFields()).stream()
@@ -172,8 +172,6 @@ public class MutantsGenerator {
 
 		this.currentOperation = null;
 
-		this.classFinalAttrsNonInitialized = this.findFinalAttrsNonInitialized(mClass);
-
 		mClass.accept(this.mutationVisitor, this);
 
 		if (this.mutantsPerClass.get(this.currentClassFQN) != null &&
@@ -191,8 +189,6 @@ public class MutantsGenerator {
 
 			mClass.getMembers().add(0, fieldDecl);	
 		}
-
-		this.classFinalAttrsNonInitialized = null;
 	}
 
 	/**
@@ -205,7 +201,7 @@ public class MutantsGenerator {
 
 		CompilationUnit mcu = original.clone(); //mcu: mutated compilation unit
 		List<ClassOrInterfaceDeclaration> classes = mcu.findAll(ClassOrInterfaceDeclaration.class, 
-				c -> !c.isInterface() && !c.isNestedType()); // && !c.isInnerClass() && !c.isStatic()
+				c -> !c.isInterface() && !c.isNestedType()); // neither interface nor nested class
 
 		//mutate each class in compilation unit
 		for (ClassOrInterfaceDeclaration aClass : classes) {

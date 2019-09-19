@@ -1,14 +1,14 @@
 package br.ufmg.labsoft.mutvariants.core;
 
-import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Set;
 
-import com.github.javaparser.ast.Modifier;
-import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.BinaryExpr;
+import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.stmt.DoStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
@@ -26,42 +26,13 @@ import br.ufmg.labsoft.mutvariants.mutops.MutationOperator;
 
 class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 
-	@Deprecated
-	public void defaultMutationVisiting(Node node, MutantsGenerator mGen) {
-		
-		//check whether expr is a change point
-		List<MutationOperator> mutOps = mGen.checkChangePoint(node);
-
-		//keep visiting
-		Method visitMethod = null;
-		try {
-//			visitMethod = super.getClass().getDeclaredMethod("visit", node.getClass(), Object.class);
-			visitMethod = this.getClass().getSuperclass().getDeclaredMethod("visit", node.getClass(), Object.class);
-			System.out.println();
-			System.out.println(this.getClass().getGenericSuperclass());
-			System.out.println(this.getClass().getSuperclass());
-			System.out.println(super.getClass());
-
-//			System.out.println();
-//			for (Method m : this.getClass().getSuperclass().getMethods()) {
-//				System.out.println(m);
-//			}
-			System.out.println(visitMethod);
-			
-//			visitMethod.invoke(super.getClass().newInstance(), node.getClass().cast(node), mGen);
-
-		} catch (NoSuchMethodException | SecurityException e1) {
-			e1.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-//		} catch (InstantiationException e) {
-//			e.printStackTrace();
-		}
-
-		node.getClass().cast(node);
-
-		//mutate
-		mGen.generateMutants(node, mutOps);
+	@Override
+	public void visit(ClassOrInterfaceDeclaration classDecl, MutantsGenerator mGen) {
+		// temp is necessary due to attributes in nested classes
+		Set<NameExpr> temp = mGen.classFinalAttrsNonInitialized;
+		mGen.classFinalAttrsNonInitialized = mGen.findFinalAttrsNonInitialized(classDecl);
+		super.visit(classDecl, mGen);
+		mGen.classFinalAttrsNonInitialized = temp;
 	}
 
 	@Override
