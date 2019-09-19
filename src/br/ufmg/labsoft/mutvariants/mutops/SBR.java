@@ -72,12 +72,11 @@ public class SBR implements MutationOperator {
 				 * statements/blocks containing the initialization 
 				 * of a final attribute are not removed 
 				 */
-				boolean containsInitializationOfFinalAttr = false;
-				if (mGen.classFinalAttrsNonInitialized != null) {
+				if (mGen.classFinalAttributesNonInitialized != null) {
 					List<AssignExpr> assignExprs = node.findAll(AssignExpr.class).stream()
 							.filter(ae -> ae.getOperator().equals(AssignExpr.Operator.ASSIGN)
-									&& (ae.getTarget().isNameExpr() || ae.getTarget().isFieldAccessExpr())
-									)
+									//with or without 'this.'
+									&& (ae.getTarget().isNameExpr() || ae.getTarget().isFieldAccessExpr()))
 							.collect(Collectors.toList());
 					
 					for (AssignExpr ae : assignExprs) {
@@ -85,17 +84,40 @@ public class SBR implements MutationOperator {
 						if (ae.getTarget().isNameExpr()) {
 							nameExpr = (NameExpr)ae.getTarget();
 						}
-						else if (ae.getTarget().isFieldAccessExpr()) {
+						else if (ae.getTarget().isFieldAccessExpr()) { // this.
 							nameExpr = ((FieldAccessExpr)ae.getTarget()).getNameAsExpression();
 						}
 						
-						containsInitializationOfFinalAttr = 
-								mGen.classFinalAttrsNonInitialized.contains(nameExpr);
+						if (mGen.classFinalAttributesNonInitialized.contains(nameExpr)) {
+							return false;
+						}
 					}
 				}
 				
-				return !containsInitializationOfFinalAttr;
-			}
+				/*
+				 * statements/blocks containing the initialization 
+				 * of a final attribute are not removed 
+				 */
+				if (mGen.operationFinalVariablesNonInitialized != null) {
+					List<AssignExpr> assignExprs = node.findAll(AssignExpr.class).stream()
+							.filter(ae -> ae.getOperator().equals(AssignExpr.Operator.ASSIGN)
+									&& ae.getTarget().isNameExpr())
+							.collect(Collectors.toList());
+					
+					for (AssignExpr ae : assignExprs) {
+						NameExpr nameExpr = null;
+						if (ae.getTarget().isNameExpr()) {
+							nameExpr = (NameExpr)ae.getTarget();
+						}
+
+						if (mGen.operationFinalVariablesNonInitialized.contains(nameExpr)) {
+							return false;
+						}
+					}
+				}
+
+				return true;
+			}			
 		}
 
 		return false;

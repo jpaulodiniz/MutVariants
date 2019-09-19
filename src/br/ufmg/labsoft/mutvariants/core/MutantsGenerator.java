@@ -16,9 +16,11 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.BooleanLiteralExpr;
 import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.PrimitiveType.Primitive;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
@@ -53,7 +55,8 @@ public class MutantsGenerator {
 	private Map<String, List<String>> mutantsPerClass; //key: class FQN; value: list of mutants
 	public String currentClassFQN; //helper field: current class fully qualified name (FQN)
 	
-	public Set<NameExpr> classFinalAttrsNonInitialized;
+	public Set<NameExpr> classFinalAttributesNonInitialized;
+	public Set<NameExpr> operationFinalVariablesNonInitialized;
 	
 	public String currentOperation; //helper field - method or constructor - Issue #3
 	private long mutantsCounterGlobal; //helper field
@@ -154,10 +157,30 @@ public class MutantsGenerator {
 				}
 			}
 		}
-		
+
 		return finalVariablesNonInitialized.isEmpty() ? null : finalVariablesNonInitialized;
 	}
 	
+	public Set<NameExpr> findFinalVariablesNonInitialized(MethodDeclaration mMethod) {
+		Set<NameExpr> finalVariablesNonInitialized = new HashSet<>(); 
+		
+		List<VariableDeclarationExpr> methodFinalVariableDeclarations = 
+				mMethod.getBody().get().findAll(VariableDeclarationExpr.class, v -> 
+					v.getModifiers().contains(Modifier.FINAL) &&
+					v.getParentNode().get().getParentNode().equals(mMethod.getBody()));
+		
+		for (VariableDeclarationExpr finalVarDecl : methodFinalVariableDeclarations) {
+
+			for (VariableDeclarator vd : finalVarDecl.getVariables()) {
+				if (!vd.getInitializer().isPresent()) {
+					finalVariablesNonInitialized.add(vd.getNameAsExpression());
+				}
+			}
+		}
+		
+		return finalVariablesNonInitialized.isEmpty() ? null : finalVariablesNonInitialized;
+	}
+
 	/**
 	 * @param original
 	 * @return

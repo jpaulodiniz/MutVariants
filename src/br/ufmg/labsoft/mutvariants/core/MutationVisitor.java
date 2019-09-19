@@ -28,11 +28,11 @@ class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 
 	@Override
 	public void visit(ClassOrInterfaceDeclaration classDecl, MutantsGenerator mGen) {
-		// temp is necessary due to attributes in nested classes
-		Set<NameExpr> temp = mGen.classFinalAttrsNonInitialized;
-		mGen.classFinalAttrsNonInitialized = mGen.findFinalAttrsNonInitialized(classDecl);
+		// previous is necessary due to attributes in nested classes
+		Set<NameExpr> previous = mGen.classFinalAttributesNonInitialized;
+		mGen.classFinalAttributesNonInitialized = mGen.findFinalAttrsNonInitialized(classDecl);
 		super.visit(classDecl, mGen);
-		mGen.classFinalAttrsNonInitialized = temp;
+		mGen.classFinalAttributesNonInitialized = previous;
 	}
 
 	@Override
@@ -43,6 +43,7 @@ class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 		}
 
 		mGen.currentOperation = methodDecl.getNameAsString() + "_" + methodDecl.getBegin().get().line;
+		mGen.operationFinalVariablesNonInitialized = mGen.findFinalVariablesNonInitialized(methodDecl);
 
 		Type returnType = methodDecl.getType();
 		boolean retSafe = true;
@@ -60,6 +61,7 @@ class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 
 		super.visit(methodDecl, mGen);
 		mGen.currentOperation = null;
+		mGen.operationFinalVariablesNonInitialized = null;
 	}
 
 	@Override
