@@ -56,7 +56,7 @@ public class MutantsGenerator {
 	public String currentClassFQN; //helper field: current class fully qualified name (FQN)
 	
 	public Set<NameExpr> classFinalAttributesNonInitialized;
-	public Set<NameExpr> operationFinalVariablesNonInitialized;
+	public Set<NameExpr> methodVariablesNonInitialized;
 	
 	public String currentOperation; //helper field - method or constructor - Issue #3
 	private long mutantsCounterGlobal; //helper field
@@ -161,24 +161,30 @@ public class MutantsGenerator {
 		return finalVariablesNonInitialized.isEmpty() ? null : finalVariablesNonInitialized;
 	}
 	
-	public Set<NameExpr> findFinalVariablesNonInitialized(MethodDeclaration mMethod) {
-		Set<NameExpr> finalVariablesNonInitialized = new HashSet<>(); 
+	/**
+	 * find local operation's (methods, constructors) variables that
+	 * - are direct operation's children and
+	 * - were not initialized in their declaration expressions
+	 * @param mMethod
+	 * @return list of NameExpr of such variable declarations
+	 */
+	public Set<NameExpr> findVariablesNonInitialized(MethodDeclaration mMethod) {
+		Set<NameExpr> variablesNonInitialized = new HashSet<>(); 
 		
 		List<VariableDeclarationExpr> methodFinalVariableDeclarations = 
 				mMethod.getBody().get().findAll(VariableDeclarationExpr.class, v -> 
-					v.getModifiers().contains(Modifier.FINAL) &&
 					v.getParentNode().get().getParentNode().equals(mMethod.getBody()));
 		
 		for (VariableDeclarationExpr finalVarDecl : methodFinalVariableDeclarations) {
 
 			for (VariableDeclarator vd : finalVarDecl.getVariables()) {
 				if (!vd.getInitializer().isPresent()) {
-					finalVariablesNonInitialized.add(vd.getNameAsExpression());
+					variablesNonInitialized.add(vd.getNameAsExpression());
 				}
 			}
 		}
 		
-		return finalVariablesNonInitialized.isEmpty() ? null : finalVariablesNonInitialized;
+		return variablesNonInitialized.isEmpty() ? null : variablesNonInitialized;
 	}
 
 	/**

@@ -43,7 +43,7 @@ class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 		}
 
 		mGen.currentOperation = methodDecl.getNameAsString() + "_" + methodDecl.getBegin().get().line;
-		mGen.operationFinalVariablesNonInitialized = mGen.findFinalVariablesNonInitialized(methodDecl);
+		mGen.methodVariablesNonInitialized = mGen.findVariablesNonInitialized(methodDecl);
 
 		Type returnType = methodDecl.getType();
 		boolean retSafe = true;
@@ -61,7 +61,7 @@ class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 
 		super.visit(methodDecl, mGen);
 		mGen.currentOperation = null;
-		mGen.operationFinalVariablesNonInitialized = null;
+		mGen.methodVariablesNonInitialized = null;
 	}
 
 	@Override

@@ -97,9 +97,9 @@ public class SBR implements MutationOperator {
 			
 			/*
 			 * statements/blocks containing the initialization 
-			 * of a final attribute are not removed 
+			 * of a non initialized variable are not removed 
 			 */
-			if (mGen.operationFinalVariablesNonInitialized != null) {
+			if (mGen.methodVariablesNonInitialized != null) {
 				List<AssignExpr> assignExprs = node.findAll(AssignExpr.class).stream()
 						.filter(ae -> ae.getOperator().equals(AssignExpr.Operator.ASSIGN)
 								&& ae.getTarget().isNameExpr())
@@ -108,8 +108,15 @@ public class SBR implements MutationOperator {
 				for (AssignExpr ae : assignExprs) {
 					if (ae.getTarget().isNameExpr()) {
 						NameExpr nameExpr = (NameExpr)ae.getTarget();
-						if (mGen.operationFinalVariablesNonInitialized.contains(nameExpr)) {
-							return false;
+						if (mGen.methodVariablesNonInitialized.contains(nameExpr)) {
+							// handling a 'commons-cli' case: "int i; for (i=...)"
+							boolean forInitExprs = ae.getParentNode().isPresent()
+									&& ae.getParentNode().get() instanceof ForStmt
+									&& ((ForStmt)ae.getParentNode().get()).getInitialization().contains(ae);
+//							System.out.println("DEBUG: " + forInitExprs + "\n" + ae);
+							if (!forInitExprs) {
+								return false;
+							}
 						}
 					}
 				}
