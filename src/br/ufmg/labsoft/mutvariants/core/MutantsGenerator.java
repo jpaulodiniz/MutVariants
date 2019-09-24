@@ -164,12 +164,12 @@ public class MutantsGenerator {
 	public Set<NameExpr> findFinalVariablesNonInitialized(MethodDeclaration mMethod) {
 		Set<NameExpr> finalVariablesNonInitialized = new HashSet<>(); 
 		
-		List<VariableDeclarationExpr> operationFinalVariableDeclarations = 
+		List<VariableDeclarationExpr> methodFinalVariableDeclarations = 
 				mMethod.getBody().get().findAll(VariableDeclarationExpr.class, v -> 
 					v.getModifiers().contains(Modifier.FINAL) &&
 					v.getParentNode().get().getParentNode().equals(mMethod.getBody()));
 		
-		for (VariableDeclarationExpr finalVarDecl : operationFinalVariableDeclarations) {
+		for (VariableDeclarationExpr finalVarDecl : methodFinalVariableDeclarations) {
 
 			for (VariableDeclarator vd : finalVarDecl.getVariables()) {
 				if (!vd.getInitializer().isPresent()) {
@@ -256,7 +256,7 @@ public class MutantsGenerator {
 	 */
 	public String nextMutantVariableName() {
 
-		String mutantVariable = buildMutantVariableName(this.currentClassFQN, this.mutantsCounterGlobal++);
+		String mutantVariable = buildMutantVariableName(this.mutantsCounterGlobal++);
 	
 		if (this.mutantsPerClass.get(this.currentClassFQN) == null) {
 			this.mutantsPerClass.put(this.currentClassFQN, new ArrayList<>());
@@ -266,11 +266,10 @@ public class MutantsGenerator {
 		return mutantVariable;
 	}
 
-	private static String buildMutantVariableName(String classFQN, long mutSeq) {
+	private static String buildMutantVariableName(long mutSeq) {
 
 		StringBuilder mutantName = new StringBuilder();
 //		mutantName.append(Constants.MUTANT_VARIABLE_PREFIX1);
-//		mutantName.append(simplify(classFQN));
 		mutantName.append(Constants.MUTANT_VARIABLE_PREFIX2);
 		mutantName.append(mutSeq);
 	
