@@ -44,80 +44,78 @@ public class SBR implements MutationOperator {
 	@Override
 	public boolean isChangePoint(Node node, MutantsGenerator mGen) {
 
-		if (node instanceof Statement) {
-
-			if (blockStatementsToRemove.contains(node.getClass()) || 
-					(node instanceof ExpressionStmt && 
-							!(ExpressionStmt.class.cast(node).getExpression() 
-									instanceof VariableDeclarationExpr)) ) {
+		if (node instanceof Statement && 
+				//blocks above or not variable declaration
+				(blockStatementsToRemove.contains(node.getClass()) ||
+						(node instanceof ExpressionStmt && 
+								!(ExpressionStmt.class.cast(node).getExpression() 
+										instanceof VariableDeclarationExpr)) ) ) {
 				
-				// nested 'else if' blocks are not removed
-				if (node instanceof IfStmt &&
-						node.getParentNode().get() instanceof IfStmt) {
-					return false;
-				}
+			// nested 'else if' blocks are not removed
+			if (node instanceof IfStmt &&
+					node.getParentNode().get() instanceof IfStmt) {
+				return false;
+			}
 
-				/*
-				 * blocks containing return statements are removed only if there is
-				 * the method has direct return statement as child
-				 */
-				if (mGen.currentOperation != null && // not a static block, etc...
-						mGen.currentOperation.endsWith("__nrs") &&
-						blockStatementsToRemove.contains(node.getClass()) &&
-						node.findFirst(ReturnStmt.class).isPresent()) {
-					return false;
-				}
+			/*
+			 * blocks containing return statements are removed only if there is
+			 * the method has direct return statement as child
+			 */
+			if (mGen.currentOperation != null && // not a static block, etc...
+					mGen.currentOperation.endsWith("__nrs") &&
+					blockStatementsToRemove.contains(node.getClass()) &&
+					node.findFirst(ReturnStmt.class).isPresent()) {
+				return false;
+			}
 
-				/*
-				 * statements/blocks containing the initialization 
-				 * of a final attribute are not removed 
-				 */
-				if (mGen.classFinalAttributesNonInitialized != null) {
-					List<AssignExpr> assignExprs = node.findAll(AssignExpr.class).stream()
-							.filter(ae -> ae.getOperator().equals(AssignExpr.Operator.ASSIGN)
-									//with or without 'this.'
-									&& (ae.getTarget().isNameExpr() || ae.getTarget().isFieldAccessExpr()))
-							.collect(Collectors.toList());
+			/*
+			 * statements/blocks containing the initialization 
+			 * of a final attribute are not removed 
+			 */
+			if (mGen.classFinalAttributesNonInitialized != null) {
+				List<AssignExpr> assignExprs = node.findAll(AssignExpr.class).stream()
+						.filter(ae -> ae.getOperator().equals(AssignExpr.Operator.ASSIGN)
+								//with or without 'this.'
+								&& (ae.getTarget().isNameExpr() || ae.getTarget().isFieldAccessExpr()))
+						.collect(Collectors.toList());
+				
+				for (AssignExpr ae : assignExprs) {
+					NameExpr nameExpr = null;
+					if (ae.getTarget().isNameExpr()) {
+						nameExpr = (NameExpr)ae.getTarget();
+					}
+					else if (ae.getTarget().isFieldAccessExpr()) { // this.
+						nameExpr = ((FieldAccessExpr)ae.getTarget()).getNameAsExpression();
+					}
 					
-					for (AssignExpr ae : assignExprs) {
-						NameExpr nameExpr = null;
-						if (ae.getTarget().isNameExpr()) {
-							nameExpr = (NameExpr)ae.getTarget();
-						}
-						else if (ae.getTarget().isFieldAccessExpr()) { // this.
-							nameExpr = ((FieldAccessExpr)ae.getTarget()).getNameAsExpression();
-						}
-						
-						if (mGen.classFinalAttributesNonInitialized.contains(nameExpr)) {
-							return false;
-						}
+					if (nameExpr != null &&
+							mGen.classFinalAttributesNonInitialized.contains(nameExpr)) {
+						return false;
 					}
 				}
+			}
+			
+			/*
+			 * statements/blocks containing the initialization 
+			 * of a final attribute are not removed 
+			 */
+			if (mGen.operationFinalVariablesNonInitialized != null) {
+				List<AssignExpr> assignExprs = node.findAll(AssignExpr.class).stream()
+						.filter(ae -> ae.getOperator().equals(AssignExpr.Operator.ASSIGN)
+								&& ae.getTarget().isNameExpr())
+						.collect(Collectors.toList());
 				
-				/*
-				 * statements/blocks containing the initialization 
-				 * of a final attribute are not removed 
-				 */
-				if (mGen.operationFinalVariablesNonInitialized != null) {
-					List<AssignExpr> assignExprs = node.findAll(AssignExpr.class).stream()
-							.filter(ae -> ae.getOperator().equals(AssignExpr.Operator.ASSIGN)
-									&& ae.getTarget().isNameExpr())
-							.collect(Collectors.toList());
-					
-					for (AssignExpr ae : assignExprs) {
-						NameExpr nameExpr = null;
-						if (ae.getTarget().isNameExpr()) {
-							nameExpr = (NameExpr)ae.getTarget();
-						}
-
+				for (AssignExpr ae : assignExprs) {
+					if (ae.getTarget().isNameExpr()) {
+						NameExpr nameExpr = (NameExpr)ae.getTarget();
 						if (mGen.operationFinalVariablesNonInitialized.contains(nameExpr)) {
 							return false;
 						}
 					}
 				}
+			}
 
-				return true;
-			}			
+			return true;
 		}
 
 		return false;
