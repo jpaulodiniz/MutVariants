@@ -60,7 +60,7 @@ public class Main {
 		mg.addMutationOperators(mutationOperators);
 
 		mg.setAllPossibleMutationsPerChangePoint(true);
-		mg.setMutateLoopConditions(false); //TODO not working
+		mg.setMutateLoopConditions(true);
 		mg.setListenerCallsInstrumentation(true);
 		mg.setMutationRate(1d);
 		mg.setTypeSolver(typeSolvers);

@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
+import br.ufmg.labsoft.mutvariants.core.MutantsGenerator;
+import br.ufmg.labsoft.mutvariants.entity.MutationInfo;
+
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.BinaryExpr.Operator;
@@ -11,11 +14,13 @@ import com.github.javaparser.ast.expr.ConditionalExpr;
 import com.github.javaparser.ast.expr.EnclosedExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.stmt.DoStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
+import com.github.javaparser.ast.stmt.ForStmt;
+import com.github.javaparser.ast.stmt.ForeachStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
-
-import br.ufmg.labsoft.mutvariants.entity.MutationInfo;
-import br.ufmg.labsoft.mutvariants.core.MutantsGenerator;
+import com.github.javaparser.ast.stmt.Statement;
+import com.github.javaparser.ast.stmt.WhileStmt;
 
 public abstract class BinaryExpressionOperatorReplacement implements MutationOperator {
 
@@ -30,14 +35,34 @@ public abstract class BinaryExpressionOperatorReplacement implements MutationOpe
 	}
 
 	/**
-	 * ensures that condition expressions of statements like For, While, etc won't be mutated
+	 * takes into account MutantsGenerator.mutateLoopConditions
 	 */
 	@Override
 	public boolean isChangePoint(Node node, MutantsGenerator mGen) {
 		
 		if (node instanceof BinaryExpr) {
-			return node.findAncestor(ExpressionStmt.class).isPresent() || //expression statement
-					node.findAncestor(IfStmt.class).isPresent(); //conditional expression inside if
+			
+			if (node.findAncestor(ExpressionStmt.class).isPresent()) { //expression statement
+				return true;
+			}
+			else if (node.findAncestor(Statement.class).isPresent()) {
+				Statement ancestorStmt = node.findAncestor(Statement.class).get();
+				
+				if (ancestorStmt instanceof IfStmt) {
+					return true;
+				}
+				else if (mGen.getMutateLoopConditions()) {
+					return true;
+				}
+				else if (
+						!(ancestorStmt instanceof ForStmt) && 
+						!(ancestorStmt instanceof WhileStmt) && 
+						!(ancestorStmt instanceof DoStmt) && 
+						!(ancestorStmt instanceof ForeachStmt)
+				) {
+					return true;
+				}
+			}
 		}
 
 		return false;
