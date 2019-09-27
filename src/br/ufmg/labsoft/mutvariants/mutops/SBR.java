@@ -205,9 +205,4 @@ public class SBR implements MutationOperator {
 		int idx = className.lastIndexOf('.') + 1;
 		return className.substring(idx);
 	}
-
-	@Override
-	public String getName() {
-		return "SBR";
-	}
 }

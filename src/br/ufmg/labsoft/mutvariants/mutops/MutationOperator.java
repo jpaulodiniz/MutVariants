@@ -10,5 +10,7 @@ public interface MutationOperator {
 
 	public Node generateMutants(Node original, MutantsGenerator mGen);
 	
-	public String getName();
+	default public String getName() {
+		return this.getClass().getSimpleName();
+	}
 }
