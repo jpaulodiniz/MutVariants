@@ -26,9 +26,11 @@ import com.github.javaparser.ast.type.PrimitiveType.Primitive;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 
 import br.ufmg.labsoft.mutvariants.entity.MutationInfo;
+import br.ufmg.labsoft.mutvariants.listeners.ListenerUtil;
 import br.ufmg.labsoft.mutvariants.mutops.MutationOperator;
 import br.ufmg.labsoft.mutvariants.util.Constants;
 import br.ufmg.labsoft.mutvariants.util.IO;
+import gov.nasa.jpf.annotation.Conditional;
 
 /*
  * TODO(s)
@@ -67,7 +69,7 @@ public class MutantsGenerator {
 	 */
 	private boolean allPossibleMutationsPerChangePoint = false;
 	private boolean mutateLoopConditions = false;
-	private boolean listenerCallsInstrumentation = false;
+	private boolean listenerCallsInstrumentation = false; // Issue #5
 	private double mutationRate = 1d; 
 	private TypeSolver typeSolver;
 
@@ -214,7 +216,7 @@ public class MutantsGenerator {
 			}
 
 			FieldDeclaration fieldDecl = new FieldDeclaration(EnumSet.of(Modifier.PUBLIC, Modifier.STATIC), variables);
-			fieldDecl.addMarkerAnnotation(Constants.VAREXJ_CONDITIONAL_NAME);
+			fieldDecl.addMarkerAnnotation(Conditional.class);
 
 			mClass.getMembers().add(0, fieldDecl);	
 		}
@@ -240,9 +242,13 @@ public class MutantsGenerator {
 			}
 		}
 
+		if (getListenerCallsInstrumentation()) {
+			mcu.addImport(ListenerUtil.class);
+		}
+
 		if (mutantsCounterPerCompUn > 0) {
 			//add import Conditional
-			mcu.addImport(Constants.VAREXJ_CONDITIONAL_FQN);
+			mcu.addImport(Conditional.class);
 
 //			if (TODO) {
 //				mcu.addImport(Constants.MUTANT_SCHEMATA_LIB, true, true);
@@ -299,7 +305,8 @@ public class MutantsGenerator {
 			CompilationUnit original = IO.getCompilationUnitFromFile(f);
 			CompilationUnit mutated = this.generateMutants(original);
 
-			if (mutated.getImports().stream().anyMatch(i -> i.getNameAsString().startsWith(Constants.VAREXJ_CONDITIONAL_FQN))) {
+			if (mutated.getImports().stream().anyMatch(i -> i.getNameAsString()
+					.startsWith(Conditional.class.getName()))) {
 				++countMutatedCompilationUnits;
 				IO.writeCompilationUnit(mutated, new File(outputPath));
 			}

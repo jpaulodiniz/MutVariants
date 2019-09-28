@@ -99,7 +99,7 @@ public class ListenerUtil {
 	private static void insertListenerCallInBlockStatement(BlockStmt blockStmt, int position, MutantsGenerator mGen) {
 
 		//TODO dinamically retrieve the listener object instantiated in this class
-		MethodCallExpr listenerCall = new MethodCallExpr(new NameExpr("br.ufmg.labsoft.util.ListenerUtil.listener"), 
+		MethodCallExpr listenerCall = new MethodCallExpr(new NameExpr("ListenerUtil.listener"), 
 				"listen", 
 				NodeList.nodeList(new StringLiteralExpr(mGen.currentClassFQN + "." + mGen.currentOperation)));
 
