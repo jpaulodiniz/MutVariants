@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 import com.github.javaparser.ast.CompilationUnit;
@@ -16,11 +17,11 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.BooleanLiteralExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.PrimitiveType.Primitive;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
@@ -58,7 +59,7 @@ public class MutantsGenerator {
 	public String currentClassFQN; //helper field: current class fully qualified name (FQN)
 	
 	public Set<NameExpr> classFinalAttributesNonInitialized;
-	public Set<NameExpr> methodVariablesNonInitialized;
+	public Stack<Set<NameExpr>> blockVariablesNonInitialized; //SBR (Issue #2)
 	
 	public String currentOperation; //helper field - method or constructor - Issue #3
 	private long mutantsCounterGlobal; //helper field
@@ -80,6 +81,7 @@ public class MutantsGenerator {
 		this.mutantsCatalog = new ArrayList<>();
 		this.groupsOfMutants = new ArrayList<>();
 		this.nestedMutantInfo = new HashMap<>();
+		this.blockVariablesNonInitialized = new Stack<>();
 	}
 
 	public boolean isAllPossibleMutationsPerChangePoint() {
@@ -162,22 +164,22 @@ public class MutantsGenerator {
 
 		return finalVariablesNonInitialized.isEmpty() ? null : finalVariablesNonInitialized;
 	}
-	
+
 	/**
-	 * find local operation's (methods, constructors) variables that
-	 * - are direct operation's children and
-	 * - were not initialized in their declaration expressions
-	 * @param mMethod
+	 * find local variables in current block (not tested ones)
+	 * that are not initialized in their declaration expressions
+	 * @param mBlock mutation candidate block
 	 * @return list of NameExpr of such variable declarations
 	 */
-	public Set<NameExpr> findVariablesNonInitialized(MethodDeclaration mMethod) {
+	public Set<NameExpr> findVariablesNonInitialized(BlockStmt mBlock) {
 		Set<NameExpr> variablesNonInitialized = new HashSet<>(); 
 		
-		List<VariableDeclarationExpr> methodVariableDeclarations = 
-				mMethod.getBody().get().findAll(VariableDeclarationExpr.class, v -> 
-					v.getParentNode().get().getParentNode().equals(mMethod.getBody()));
+		List<VariableDeclarationExpr> variableDeclarations = 
+				mBlock.findAll(VariableDeclarationExpr.class,
+						// declared only in current block, not nested ones
+						v -> v.getParentNode().get().getParentNode().get().equals(mBlock));
 		
-		for (VariableDeclarationExpr varDecl : methodVariableDeclarations) {
+		for (VariableDeclarationExpr varDecl : variableDeclarations) {
 
 			for (VariableDeclarator vd : varDecl.getVariables()) {
 				if (!vd.getInitializer().isPresent()) {
@@ -185,7 +187,7 @@ public class MutantsGenerator {
 				}
 			}
 		}
-		
+
 		return variablesNonInitialized.isEmpty() ? null : variablesNonInitialized;
 	}
 
@@ -324,7 +326,6 @@ public class MutantsGenerator {
 	}
 
 	/**
-	 * TODO implement lambda
 	 * @param node
 	 * @return
 	 */

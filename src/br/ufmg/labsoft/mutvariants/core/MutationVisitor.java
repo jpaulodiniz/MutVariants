@@ -9,6 +9,7 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.DoStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
@@ -35,6 +36,20 @@ class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 		mGen.classFinalAttributesNonInitialized = previous;
 	}
 
+	/*
+	 * specific for SBR mutop (TODO: refactor)
+	 */
+	@Override
+	public void visit(BlockStmt block, MutantsGenerator mGen) {
+		
+		Set<NameExpr> vni = mGen.findVariablesNonInitialized(block);
+		mGen.blockVariablesNonInitialized.push(vni);
+
+		super.visit(block, mGen);
+
+		mGen.blockVariablesNonInitialized.pop();
+	}
+
 	@Override
 	public void visit(MethodDeclaration methodDecl, MutantsGenerator mGen) {
 		
@@ -43,7 +58,6 @@ class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 		}
 
 		mGen.currentOperation = methodDecl.getNameAsString() + "_" + methodDecl.getBegin().get().line;
-		mGen.methodVariablesNonInitialized = mGen.findVariablesNonInitialized(methodDecl);
 
 		Type returnType = methodDecl.getType();
 		boolean retSafe = true;
@@ -61,7 +75,6 @@ class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 
 		super.visit(methodDecl, mGen);
 		mGen.currentOperation = null;
-		mGen.methodVariablesNonInitialized = null;
 	}
 
 	@Override

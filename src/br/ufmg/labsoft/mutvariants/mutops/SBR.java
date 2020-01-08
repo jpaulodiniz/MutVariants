@@ -1,6 +1,7 @@
 package br.ufmg.labsoft.mutvariants.mutops;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -45,7 +46,10 @@ public class SBR implements MutationOperator {
 	public boolean isChangePoint(Node node, MutantsGenerator mGen) {
 
 		if (node instanceof Statement && 
-				//node is a block in blockStatementsToRemove OR is not a variable declaration
+				/*
+				 * node is a statement in 'blockStatementsToRemove' OR
+				 * is not a variable declaration statement
+				 */
 				(blockStatementsToRemove.contains(node.getClass()) ||
 						(node instanceof ExpressionStmt && 
 								!(ExpressionStmt.class.cast(node).getExpression() 
@@ -99,7 +103,7 @@ public class SBR implements MutationOperator {
 			 * statements/blocks containing the initialization 
 			 * of a non initialized variable are not removed 
 			 */
-			if (mGen.methodVariablesNonInitialized != null) {
+			if (!mGen.blockVariablesNonInitialized.isEmpty()) {
 				List<AssignExpr> assignExprs = node.findAll(AssignExpr.class).stream()
 						.filter(ae -> ae.getOperator().equals(AssignExpr.Operator.ASSIGN)
 								&& ae.getTarget().isNameExpr())
@@ -108,14 +112,25 @@ public class SBR implements MutationOperator {
 				for (AssignExpr ae : assignExprs) {
 					if (ae.getTarget().isNameExpr()) {
 						NameExpr nameExpr = (NameExpr)ae.getTarget();
-						if (mGen.methodVariablesNonInitialized.contains(nameExpr)) {
-							// handling a 'commons-cli' case: "int i; for (i=...)"
-							boolean forInitExprs = ae.getParentNode().isPresent()
-									&& ae.getParentNode().get() instanceof ForStmt
-									&& ((ForStmt)ae.getParentNode().get()).getInitialization().contains(ae);
-//							System.out.println("DEBUG: " + forInitExprs + "\n" + ae);
-							if (!forInitExprs) {
-								return false;
+						
+						for (int i=mGen.blockVariablesNonInitialized.size() - 1; i >= 0; --i) {
+							Set<NameExpr> nameExprs = mGen.blockVariablesNonInitialized.get(i);
+
+							if (nameExprs != null && nameExprs.contains(nameExpr)) {
+								/*
+								 * handling 2 cases found in commons-cli:
+								 * "int i; for (i=...)"
+								 * "String line; while ((line = in.readLine()) != null))"
+								 */
+								Optional<Statement> ancestor = ae.findAncestor(Statement.class);
+								if (ancestor.isPresent()) {
+									Statement parentStatement = ancestor.get();
+									if (!(parentStatement instanceof WhileStmt) &&
+											!(parentStatement instanceof ForStmt)) {
+//										System.out.println("DEBUG: FOR/WHILE\n" + ae);
+										return false;
+									}
+								}
 							}
 						}
 					}
