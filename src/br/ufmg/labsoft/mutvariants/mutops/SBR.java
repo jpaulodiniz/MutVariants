@@ -45,7 +45,7 @@ public class SBR implements MutationOperator {
 	public boolean isChangePoint(Node node, MutantsGenerator mGen) {
 
 		if (node instanceof Statement && 
-				//blocks above or not variable declaration
+				//node is a block in blockStatementsToRemove OR is not a variable declaration
 				(blockStatementsToRemove.contains(node.getClass()) ||
 						(node instanceof ExpressionStmt && 
 								!(ExpressionStmt.class.cast(node).getExpression() 
@@ -58,8 +58,8 @@ public class SBR implements MutationOperator {
 			}
 
 			/*
-			 * blocks containing return statements are removed only if there is
-			 * the method has direct return statement as child
+			 * blocks containing return statements are removed only
+			 * if the method has direct return statement as child
 			 */
 			if (mGen.currentOperation != null && // not a static block, etc...
 					mGen.currentOperation.endsWith("__nrs") &&

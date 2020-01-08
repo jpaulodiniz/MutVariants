@@ -173,13 +173,13 @@ public class MutantsGenerator {
 	public Set<NameExpr> findVariablesNonInitialized(MethodDeclaration mMethod) {
 		Set<NameExpr> variablesNonInitialized = new HashSet<>(); 
 		
-		List<VariableDeclarationExpr> methodFinalVariableDeclarations = 
+		List<VariableDeclarationExpr> methodVariableDeclarations = 
 				mMethod.getBody().get().findAll(VariableDeclarationExpr.class, v -> 
 					v.getParentNode().get().getParentNode().equals(mMethod.getBody()));
 		
-		for (VariableDeclarationExpr finalVarDecl : methodFinalVariableDeclarations) {
+		for (VariableDeclarationExpr varDecl : methodVariableDeclarations) {
 
-			for (VariableDeclarator vd : finalVarDecl.getVariables()) {
+			for (VariableDeclarator vd : varDecl.getVariables()) {
 				if (!vd.getInitializer().isPresent()) {
 					variablesNonInitialized.add(vd.getNameAsExpression());
 				}
