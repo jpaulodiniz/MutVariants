@@ -22,7 +22,7 @@ import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.type.VoidType;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
-import br.ufmg.labsoft.mutvariants.listeners.ListenerUtil;
+import br.ufmg.labsoft.mutvariants.listeners.ListenerCallsInserter;
 import br.ufmg.labsoft.mutvariants.mutops.MutationOperator;
 
 class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
@@ -119,7 +119,7 @@ class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 		List<MutationOperator> mutOps = mGen.checkChangePoint(stmt);
 		super.visit(stmt, mGen);
 		if (mGen.getListenerCallsInstrumentation()) {
-        	ListenerUtil.insertListenerCallInLoopBody(stmt.getBody(), mGen);
+        	ListenerCallsInserter.insertListenerCallInLoopBody(stmt.getBody(), mGen);
         }
 		mGen.generateMutants(stmt, mutOps);
 	}
@@ -128,7 +128,7 @@ class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 		List<MutationOperator> mutOps = mGen.checkChangePoint(stmt);
 		super.visit(stmt, mGen);
 		if (mGen.getListenerCallsInstrumentation()) {
-        	ListenerUtil.insertListenerCallInLoopBody(stmt.getBody(), mGen);
+			ListenerCallsInserter.insertListenerCallInLoopBody(stmt.getBody(), mGen);
         }
 		mGen.generateMutants(stmt, mutOps);
 	}
@@ -137,7 +137,7 @@ class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 		List<MutationOperator> mutOps = mGen.checkChangePoint(stmt);
 		super.visit(stmt, mGen);
 		if (mGen.getListenerCallsInstrumentation()) {
-        	ListenerUtil.insertListenerCallInLoopBody(stmt.getBody(), mGen);
+			ListenerCallsInserter.insertListenerCallInLoopBody(stmt.getBody(), mGen);
         }
 		mGen.generateMutants(stmt, mutOps);
 	}
@@ -146,7 +146,7 @@ class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 		List<MutationOperator> mutOps = mGen.checkChangePoint(stmt);
 		super.visit(stmt, mGen);
 		if (mGen.getListenerCallsInstrumentation()) {
-        	ListenerUtil.insertListenerCallInLoopBody(stmt.getBody(), mGen);
+			ListenerCallsInserter.insertListenerCallInLoopBody(stmt.getBody(), mGen);
         }
 		mGen.generateMutants(stmt, mutOps);
 	}
