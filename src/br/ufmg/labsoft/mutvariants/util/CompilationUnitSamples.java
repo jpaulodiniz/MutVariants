@@ -2,6 +2,7 @@ package br.ufmg.labsoft.mutvariants.util;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Modifier;
 
 public class CompilationUnitSamples {
 
@@ -10,10 +11,16 @@ public class CompilationUnitSamples {
 
 	}
 
+	public static CompilationUnit createPublicCompilationUnit(String pkg, String className) {
+		CompilationUnit compUn = new CompilationUnit(pkg);
+		compUn.addClass(Constants.MUTANTS_CLASS_NAME, Modifier.PUBLIC);
+		return compUn;
+	}
+
 	/**
-	 * creates a simple compilation unit by JP
+	 * creates a simple compilation unit
 	 */
-	public static CompilationUnit createCompilationUnit() {
+	public static CompilationUnit createSampleCompilationUnit() {
 		CompilationUnit compilationUnit = JavaParser.parse("package learning.javaparser;"
 				+ "import org.junit.Test;"
 				+ "public class A {"

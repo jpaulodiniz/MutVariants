@@ -3,12 +3,7 @@ package br.ufmg.labsoft.mutvariants.util;
 public class Constants {
 
 	/**
-	 * Example: _M_ in _M_<class_name>_mut#
-	 */
-	public static final String MUTANT_VARIABLE_PREFIX1 = "_M_"; 
-
-	/**
-	 * Example: _mut in _M_<class_name>_mut#
+	 * Example: _mut in _mut#
 	 */
 	public static final String MUTANT_VARIABLE_PREFIX2 = "_mut";
 
@@ -32,4 +27,7 @@ public class Constants {
 	 * FQN class containing methods for mutation operators in binary expressions
 	 */
 	public static final String MUTANT_SCHEMATA_LIB = "br.ufmg.labsoft.mutvariants.schematalib.SchemataLibMethods";
+
+	public static final String MUTANTS_CLASS_PACKAGE = "br.ufmg.labsoft.mutvariants";
+	public static final String MUTANTS_CLASS_NAME    = "AllMutants";
 }

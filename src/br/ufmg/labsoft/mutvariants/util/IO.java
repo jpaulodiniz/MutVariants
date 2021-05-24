@@ -133,6 +133,7 @@ public class IO {
 		return null;
 	}
 
+	@Deprecated
 	public static void saveMutantsCatalog(String outputPath, String fileName,
 			Map<String, List<String>> mutantsPerClass) {
 		

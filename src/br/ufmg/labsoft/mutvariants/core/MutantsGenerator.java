@@ -29,6 +29,7 @@ import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import br.ufmg.labsoft.mutvariants.entity.MutationInfo;
 import br.ufmg.labsoft.mutvariants.listeners.ListenerUtil;
 import br.ufmg.labsoft.mutvariants.mutops.MutationOperator;
+import br.ufmg.labsoft.mutvariants.util.CompilationUnitSamples;
 import br.ufmg.labsoft.mutvariants.util.Constants;
 import br.ufmg.labsoft.mutvariants.util.IO;
 import gov.nasa.jpf.annotation.Conditional;
@@ -55,7 +56,7 @@ public class MutantsGenerator {
 	private List<List<String>> groupsOfMutants; //Issue #4
 	private Map<String, Set<String>> nestedMutantInfo; //Issue #2
 
-	private Map<String, List<String>> mutantsPerClass; //key: class FQN; value: list of mutants
+	@Deprecated private Map<String, List<String>> mutantsPerClass; //key: class FQN; value: list of mutants
 	public String currentClassFQN; //helper field: current class fully qualified name (FQN)
 	
 	public Set<NameExpr> classFinalAttributesNonInitialized;
@@ -73,6 +74,11 @@ public class MutantsGenerator {
 	private boolean listenerCallsInstrumentation = false; // Issue #5
 	private double mutationRate = 1d; 
 	private TypeSolver typeSolver;
+	
+	/**
+	 * class that holds all mutants boolean variable declarations
+	 */
+	private CompilationUnit mutantsClass;
 
 	public MutantsGenerator() {
 		this.mutationOperators = new HashSet<>();
@@ -207,21 +213,20 @@ public class MutantsGenerator {
 
 		mClass.accept(this.mutationVisitor, this);
 
-		if (this.mutantsPerClass.get(this.currentClassFQN) != null &&
-				!this.mutantsPerClass.get(this.currentClassFQN).isEmpty()) {
-
-		//adding declarations for all conditional mutant variables
-			NodeList<VariableDeclarator> variables = new NodeList<>();
-			for (String mutName : this.mutantsPerClass.get(this.currentClassFQN)) {
-				variables.add(new VariableDeclarator(new PrimitiveType(Primitive.BOOLEAN),
-						mutName, new BooleanLiteralExpr(false)));
-			}
-
-			FieldDeclaration fieldDecl = new FieldDeclaration(EnumSet.of(Modifier.PUBLIC, Modifier.STATIC), variables);
-			fieldDecl.addMarkerAnnotation(Conditional.class);
-
-			mClass.getMembers().add(0, fieldDecl);	
-		}
+//		if (this.mutantsPerClass.get(this.currentClassFQN) != null &&
+//				!this.mutantsPerClass.get(this.currentClassFQN).isEmpty()) {
+//		//adding declarations for all conditional mutant variables
+//			NodeList<VariableDeclarator> variables = new NodeList<>();
+//			for (String mutName : this.mutantsPerClass.get(this.currentClassFQN)) {
+//				variables.add(new VariableDeclarator(new PrimitiveType(Primitive.BOOLEAN),
+//						mutName, new BooleanLiteralExpr(false)));
+//			}
+//
+//			FieldDeclaration fieldDecl = new FieldDeclaration(EnumSet.of(Modifier.PUBLIC, Modifier.STATIC), variables);
+//			fieldDecl.addMarkerAnnotation(Conditional.class);
+//
+//			mClass.getMembers().add(0, fieldDecl);	
+//		}
 	}
 
 	/**
@@ -249,13 +254,12 @@ public class MutantsGenerator {
 		}
 
 		if (mutantsCounterPerCompUn > 0) {
-			//add import Conditional
-			mcu.addImport(Conditional.class);
-
 //			if (TODO) {
 //				mcu.addImport(Constants.MUTANT_SCHEMATA_LIB, true, true);
 //			}
 
+			mcu.addImport(Constants.MUTANTS_CLASS_PACKAGE + "." 
+					+ Constants.MUTANTS_CLASS_NAME, true, true);
 			System.out.println(">>>> " + mutantsCounterPerCompUn + " mutants seeded (in Comp. Unit).");
 
 			return mcu;
@@ -283,7 +287,6 @@ public class MutantsGenerator {
 	private static String buildMutantVariableName(long mutSeq) {
 
 		StringBuilder mutantName = new StringBuilder();
-//		mutantName.append(Constants.MUTANT_VARIABLE_PREFIX1);
 		mutantName.append(Constants.MUTANT_VARIABLE_PREFIX2);
 		mutantName.append(mutSeq);
 	
@@ -297,6 +300,10 @@ public class MutantsGenerator {
 	public void mutatePackageOrDirectory(String inputPath, String outputPath) {
 
 		long ini = System.currentTimeMillis();
+		
+		this.mutantsClass = CompilationUnitSamples.createPublicCompilationUnit(
+				Constants.MUTANTS_CLASS_PACKAGE, Constants.MUTANTS_CLASS_NAME);
+		this.mutantsClass.addImport(Conditional.class); //add import Conditional TODO keep?
 	
 		this.mutantsCounterGlobal = 0;
 		int countMutatedCompilationUnits = 0;
@@ -307,19 +314,31 @@ public class MutantsGenerator {
 			CompilationUnit original = IO.getCompilationUnitFromFile(f);
 			CompilationUnit mutated = this.generateMutants(original);
 
-			if (mutated.getImports().stream().anyMatch(i -> i.getNameAsString()
-					.startsWith(Conditional.class.getName()))) {
+			if (mutated.getImports().stream().anyMatch(i -> i.getNameAsString().equals(
+					Constants.MUTANTS_CLASS_PACKAGE + "." + Constants.MUTANTS_CLASS_NAME))) {
 				++countMutatedCompilationUnits;
 				IO.writeCompilationUnit(mutated, new File(outputPath));
 			}
 		}
-
+		
+		//adding declarations for all conditional mutant variables
+		NodeList<VariableDeclarator> variables = new NodeList<>();
+		for (MutationInfo mutInfo : this.mutantsCatalog) {
+			variables.add(new VariableDeclarator(new PrimitiveType(Primitive.BOOLEAN),
+					mutInfo.getMutantVariableName(), new BooleanLiteralExpr(false)));
+		}
+		FieldDeclaration fieldDecl = new FieldDeclaration(EnumSet.of(Modifier.PUBLIC, Modifier.STATIC), variables);
+		fieldDecl.addMarkerAnnotation(Conditional.class);
+		this.mutantsClass.findFirst(ClassOrInterfaceDeclaration.class).get()
+				.getMembers().add(0, fieldDecl);
+		
+		IO.writeCompilationUnit(this.mutantsClass, new File(outputPath));
 		long fin = System.currentTimeMillis();
 	
 		System.out.print("\n>>>>> " + this.mutantsCounterGlobal + " mutants seeded");
 		System.out.print(" in " + countMutatedCompilationUnits + " mutated compilation units");
 		System.out.println(", in " + (fin - ini) + "ms");
-	
+
 		IO.saveMutantsCatalog(outputPath, Constants.MUT_CATALOG_FILE_NAME, this.mutantsCatalog);
 		IO.saveGroupsOfMutants(outputPath, Constants.GROUPS_OF_MUTANTS_FILE_NAME, this.groupsOfMutants);
 		IO.saveNestedMutantsInfo(outputPath, Constants.NESTED_MUTANTS_INFO_FILE_NAME, this.nestedMutantInfo);
