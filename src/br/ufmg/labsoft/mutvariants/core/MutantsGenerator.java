@@ -36,7 +36,6 @@ import gov.nasa.jpf.annotation.Conditional;
 
 /*
  * TODO(s)
- * - start mutantCounter with 1 (current is 0)
  * - verify if Java bitwise operators could be mutated
  * - seek for interfaces with default methods and check whether there was something to mutate
  * - don't mutate main methods
@@ -249,7 +248,7 @@ public class MutantsGenerator {
 			}
 		}
 
-		if (getListenerCallsInstrumentation()) {
+		if (this.getListenerCallsInstrumentation()) {
 			mcu.addImport(ListenerUtil.class);
 		}
 
@@ -303,8 +302,8 @@ public class MutantsGenerator {
 		
 		this.mutantsClass = CompilationUnitSamples.createPublicCompilationUnit(
 				Constants.MUTANTS_CLASS_PACKAGE, Constants.MUTANTS_CLASS_NAME);
-		this.mutantsClass.addImport(Conditional.class); //add import Conditional TODO keep?
-	
+//		this.mutantsClass.addImport(Conditional.class); //add import Conditional TODO keep?
+
 		this.mutantsCounterGlobal = 0;
 		int countMutatedCompilationUnits = 0;
 
@@ -321,17 +320,30 @@ public class MutantsGenerator {
 			}
 		}
 		
-		//adding declarations for all conditional mutant variables
-		NodeList<VariableDeclarator> variables = new NodeList<>();
+//adding declarations for all conditional mutant variables
+	
+	// declaring all mutants in a single declaration line
+/*
+//		NodeList<VariableDeclarator> variables = new NodeList<>();
+//		for (MutationInfo mutInfo : this.mutantsCatalog) {
+//			variables.add(new VariableDeclarator(new PrimitiveType(Primitive.BOOLEAN),
+//					mutInfo.getMutantVariableName(), new BooleanLiteralExpr(false)));
+//		}
+//		FieldDeclaration fieldDecl = new FieldDeclaration(EnumSet.of(Modifier.PUBLIC, Modifier.STATIC), variables);
+//		fieldDecl.addMarkerAnnotation(Conditional.class);
+//		this.mutantsClass.findFirst(ClassOrInterfaceDeclaration.class).get()
+//				.getMembers().add(0, fieldDecl);
+*/
+	// declaring one mutant per line
 		for (MutationInfo mutInfo : this.mutantsCatalog) {
-			variables.add(new VariableDeclarator(new PrimitiveType(Primitive.BOOLEAN),
-					mutInfo.getMutantVariableName(), new BooleanLiteralExpr(false)));
+			VariableDeclarator vd = new VariableDeclarator(new PrimitiveType(Primitive.BOOLEAN),
+					mutInfo.getMutantVariableName(), new BooleanLiteralExpr(false));
+			FieldDeclaration fieldDecl = new FieldDeclaration(EnumSet.of(Modifier.PUBLIC, Modifier.STATIC), vd);
+//			fieldDecl.addMarkerAnnotation(Conditional.class);
+			this.mutantsClass.findFirst(ClassOrInterfaceDeclaration.class).get()
+					.getMembers().add(fieldDecl);
 		}
-		FieldDeclaration fieldDecl = new FieldDeclaration(EnumSet.of(Modifier.PUBLIC, Modifier.STATIC), variables);
-		fieldDecl.addMarkerAnnotation(Conditional.class);
-		this.mutantsClass.findFirst(ClassOrInterfaceDeclaration.class).get()
-				.getMembers().add(0, fieldDecl);
-		
+
 		IO.writeCompilationUnit(this.mutantsClass, new File(outputPath));
 		long fin = System.currentTimeMillis();
 	
