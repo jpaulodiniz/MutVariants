@@ -18,6 +18,7 @@ import br.ufmg.labsoft.mutvariants.entity.MutationInfo;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.TypeDeclaration;
 
 public class IO {
@@ -62,20 +63,22 @@ public class IO {
 	 */
 	public static boolean writeCompilationUnit(CompilationUnit compUn, File outputDirectory) {
 
-		@SuppressWarnings("rawtypes")
-		List<TypeDeclaration> list = compUn.findAll(TypeDeclaration.class); //AnnotationDeclaration, ClassOrInterfaceDeclaration, EnumDeclaration
-		String className = null;
-		
-		if (list.size() == 1) { //a CompilationUnit may have only one class which can even be non public
-			className = list.get(0).getNameAsString();
+		// AnnotationDeclaration, ClassOrInterfaceDeclaration, EnumDeclaration
+		NodeList<TypeDeclaration<?>> types = compUn.getTypes();
+		String fileName = null;
+
+		if (types.size() == 1) {
+			//if a CompilationUnit has only one class, it cab be non public
+			fileName = compUn.getTypes().get(0).getNameAsString();
 		}
 		else {
-			className = list.stream().filter(c -> c.getModifiers().contains(Modifier.PUBLIC)).findFirst().get().getNameAsString();
+			//otherwise, a CompilationUnit may have a public class 
+			fileName = types.stream().filter(c -> c.getModifiers().contains(Modifier.PUBLIC)).findFirst().get().getNameAsString();
 		}
 
 		String packageDirectories = compUn.getPackageDeclaration().get().getNameAsString().replaceAll("\\.", File.separator);
 
-		return writeCompilationUnit(compUn, new File(outputDirectory, packageDirectories), className + ".java");
+		return writeCompilationUnit(compUn, new File(outputDirectory, packageDirectories), fileName + ".java");
 	}
 
 	/**
