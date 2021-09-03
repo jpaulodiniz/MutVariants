@@ -94,27 +94,10 @@ public class IO {
 	}
 
 	/**
-	 *
-	 * @param path to a package o directory
-	 * @return all .java files inside directory of path, except package-info.java
-	 *
-	 * Obs.: package-info.java present in
-	 */
-	@Deprecated
-	public static File[] allJavaFilesIn2(String path) {
-
-		File directory = new File(path);
-		return directory.listFiles(
-				(dir, name) -> name.endsWith(".java") && !name.equals("package-info.java")
-		);
-	}
-
-	/**
 	 * recursive
 	 * @param rootPath to a package o directory
-	 * @return all .java files inside directory of path, except package-info.java
-	 *
-	 * Obs.: package-info.java present in
+	 * @return all .java files inside directory of path,
+	 * except package-info.java and module-info.java
 	 */
 	public static List<File> allJavaFilesIn(String rootPath) {
 
