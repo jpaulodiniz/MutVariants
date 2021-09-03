@@ -16,6 +16,7 @@ import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.BooleanLiteralExpr;
 import com.github.javaparser.ast.expr.NameExpr;
@@ -145,7 +146,7 @@ public class MutantsGenerator {
 		this.groupsOfMutants.add(groupOfMutants);
 	}
 
-	public Set<NameExpr> findFinalAttrsNonInitialized(ClassOrInterfaceDeclaration mClass) {
+	public Set<NameExpr> findFinalAttrsNonInitialized(TypeDeclaration<?> mClass) {
 		Set<NameExpr> finalVariablesNonInitialized = new HashSet<>(); 
 
 		List<FieldDeclaration> finalFields = (mClass.getFields()).stream()

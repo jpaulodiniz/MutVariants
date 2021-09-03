@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
+import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.BinaryExpr;
@@ -36,12 +37,21 @@ class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 		mGen.classFinalAttributesNonInitialized = previous;
 	}
 
+	@Override // duplicated (same above code), but for enum
+	public void visit(EnumDeclaration enumDecl, MutantsGenerator mGen) {
+		// previous is necessary due to attributes in nested classes
+		Set<NameExpr> previous = mGen.classFinalAttributesNonInitialized;
+		mGen.classFinalAttributesNonInitialized = mGen.findFinalAttrsNonInitialized(enumDecl);
+		super.visit(enumDecl, mGen);
+		mGen.classFinalAttributesNonInitialized = previous;
+	}
+
 	/*
 	 * specific for SBR mutop (TODO: refactor)
 	 */
 	@Override
 	public void visit(BlockStmt block, MutantsGenerator mGen) {
-		
+
 		Set<NameExpr> vni = mGen.findVariablesNonInitialized(block);
 		mGen.blockVariablesNonInitialized.push(vni);
 
@@ -52,7 +62,7 @@ class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 
 	@Override
 	public void visit(MethodDeclaration methodDecl, MutantsGenerator mGen) {
-		
+
 		if (!methodDecl.getBody().isPresent()) { // not abstract, not default in an interface
 			return;
 		}
@@ -61,7 +71,7 @@ class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 
 		Type returnType = methodDecl.getType();
 		boolean retSafe = true;
-		
+
 		if (!(returnType instanceof VoidType)) { // function
 
 			// has a return statement as direct child
@@ -100,7 +110,7 @@ class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 		super.visit(stmt, mGen);
 		mGen.generateMutants(stmt, mutOps);
 	}
-	
+
 	@Override
 	public void visit(VariableDeclarator vd, MutantsGenerator mGen) {
 		List<MutationOperator> mutOps = mGen.checkChangePoint(vd);
