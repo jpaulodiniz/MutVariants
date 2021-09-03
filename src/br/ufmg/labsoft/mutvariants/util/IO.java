@@ -13,15 +13,27 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
-import br.ufmg.labsoft.mutvariants.entity.MutationInfo;
-
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.TypeDeclaration;
 
+import br.ufmg.labsoft.mutvariants.entity.MutationInfo;
+
 public class IO {
+
+	public static List<String> getPaths(String base, String paths) {
+
+		List<String> pathsList = new ArrayList<String>();
+		String[] tempPaths = paths.split(",");
+
+		for (String tempPath : tempPaths) {
+			pathsList.add(base + tempPath);
+		}
+
+		return pathsList;
+	}
 
 	public static CompilationUnit getCompilationUnitFromFile(File inputFile) {
 
@@ -112,7 +124,8 @@ public class IO {
 
 		for (File path : directory.listFiles()) {
 			if (path.isFile() && path.getName().endsWith(".java")
-					&& !path.getName().equals("package-info.java")) {
+					&& !path.getName().equals("package-info.java")
+					&& !path.getName().equals("module-info.java")) {
 				allJavaFiles.add(path);
 			}
 			else if (path.isDirectory()) {
@@ -122,9 +135,9 @@ public class IO {
 
 		return allJavaFiles;
 	}
-	
+
 	public static Properties loadProperties(String pathToPropertiesFile) {
-		
+
 		Properties conf = new Properties();
 		try {
 			conf.load(new FileReader(pathToPropertiesFile));
@@ -139,11 +152,11 @@ public class IO {
 	@Deprecated
 	public static void saveMutantsCatalog(String outputPath, String fileName,
 			Map<String, List<String>> mutantsPerClass) {
-		
+
 		try {
 			FileWriter fw = new FileWriter(new File(outputPath, fileName));
 			BufferedWriter bw = new BufferedWriter(fw);
-			
+
 			for (Entry<String, List<String>> pair :  mutantsPerClass.entrySet()) {
 				bw.write(pair.getKey());
 				bw.write(":");
@@ -165,16 +178,16 @@ public class IO {
 	 */
 	public static void saveMutantsCatalog(String outputPath, String fileName,
 			List<MutationInfo> mutantsCatalog) {
-		
+
 		if (mutantsCatalog == null || mutantsCatalog.isEmpty()) return;
-		
+
 		try {
 			FileWriter fw = new FileWriter(new File(outputPath, fileName));
 			BufferedWriter bw = new BufferedWriter(fw);
-			
+
 			bw.write(MutationInfo.infoHeader());
 			bw.newLine();
-			
+
 			for (MutationInfo mInfo : mutantsCatalog) {
 				bw.write(mInfo.toString());
 				bw.newLine();
@@ -195,19 +208,19 @@ public class IO {
 			String fileName, List<List<String>> groupsOfMutants) {
 
 		if (groupsOfMutants == null || groupsOfMutants.isEmpty()) return;
-		
+
 		try {
 			FileWriter fw = new FileWriter(new File(outputPath, fileName));
 			BufferedWriter bw = new BufferedWriter(fw);
-			
+
 			for (List<String> mGroup : groupsOfMutants) {
 				bw.write(mGroup.get(0));
-				
+
 				for (int i=1; i < mGroup.size(); ++i) {
 					bw.write(' ');
 					bw.write(mGroup.get(i));
 				}
-				
+
 				bw.newLine();
 			}
 			bw.close();
@@ -224,17 +237,17 @@ public class IO {
 	 */
 	public static void saveNestedMutantsInfo(String outputPath, String fileName, 
 			Map<String, Set<String>> nestedMutantInfo) {
-		
+
 		if (nestedMutantInfo == null || nestedMutantInfo.isEmpty()) return;
 
 		try {
 			FileWriter fw = new FileWriter(new File(outputPath, fileName));
 			BufferedWriter bw = new BufferedWriter(fw);
-			
+
 			for (Entry<String, Set<String>> entry : nestedMutantInfo.entrySet()) {
 				bw.write(entry.getKey());
 				bw.write(":");
-				
+
 				for (String mut : entry.getValue()) {
 					bw.write(" ");
 					bw.write(mut);
@@ -246,6 +259,5 @@ public class IO {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
 	}
 }

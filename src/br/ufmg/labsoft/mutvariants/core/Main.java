@@ -20,22 +20,21 @@ import br.ufmg.labsoft.mutvariants.util.CompilationUnitSamples;
 import br.ufmg.labsoft.mutvariants.util.IO;
 
 public class Main {
-	
+
 	public static void main(String[] args) {
-		
+
 		//TODO change path and/or properties name
 		Properties ioConf = IO.loadProperties("resources/triangle.properties");
-//		Properties ioConf = IO.loadProperties("resources/monopoly.properties");
-//		Properties ioConf = IO.loadProperties("resources/commons-cli.properties");
-//		Properties ioConf = IO.loadProperties("resources/commons-validator.properties");
 
 		String baseDir = ioConf.getProperty("base-dir");
-		String inputDir = baseDir + ioConf.getProperty("input-dir");
-		String outputDir = baseDir + ioConf.getProperty("output-dir-mut-schemata");
+		List<String> inputDirs = IO.getPaths(baseDir, ioConf.getProperty("input-dir"));
+		List<String> outputDirs = IO.getPaths(baseDir, ioConf.getProperty("output-dir-mut-schemata"));
 
 		CombinedTypeSolver typeSolvers = new CombinedTypeSolver();
 		typeSolvers.add(new ReflectionTypeSolver());
-		typeSolvers.add(new JavaParserTypeSolver(inputDir));
+		for (String inputDir : inputDirs) {
+			typeSolvers.add(new JavaParserTypeSolver(inputDir));
+		}
 
 		String jarsStr = ioConf.getProperty("dependent-jars-full-path", "");
 		if (!jarsStr.isEmpty()) {
@@ -51,7 +50,7 @@ public class Main {
 
 //		MutantsGenerator mg = new MutGenClassical(baseDir + ioConf.getProperty("output-dir-mut-classical"));
 		MutantsGenerator mg = new MutantsGenerator();
-		
+
 		List<MutationOperator> mutationOperators = new ArrayList<>();
 		mutationOperators.add(new AOR());
 		mutationOperators.add(new ROR());
@@ -65,8 +64,16 @@ public class Main {
 		mg.setMutationRate(1d);
 		mg.setTypeSolver(typeSolvers);
 
-		mg.mutatePackageOrDirectory(inputDir, outputDir);
+		String outputFilesPath = null;
+		try {
+			outputFilesPath = IO.getPaths(baseDir, 
+					ioConf.getProperty("output-catalogue-group-files")).get(0);
+		}
+		catch (Exception e) {
+			outputFilesPath = outputDirs.get(0);
+		}
 
+		mg.mutateSourceFolders(inputDirs, outputDirs, outputFilesPath);
 //		testMutateOneClass(mg);
 	}
 
@@ -75,7 +82,7 @@ public class Main {
 
 //		testMutatingJavaOperators();
 
-		CompilationUnit original = CompilationUnitSamples.createCompilationUnit();
+		CompilationUnit original = CompilationUnitSamples.createSampleCompilationUnit();
 
 		//MUTANTS GENERATION
 		CompilationUnit mutated = mg.generateMutants(original);
