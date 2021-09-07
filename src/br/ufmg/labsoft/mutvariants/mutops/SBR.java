@@ -18,6 +18,7 @@ import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.ForeachStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
+import com.github.javaparser.ast.stmt.LabeledStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.SwitchStmt;
@@ -38,9 +39,11 @@ import br.ufmg.labsoft.mutvariants.util.Constants;
  */
 public class SBR implements MutationOperator {
 
+	private static Set<Class<?>> loopStatements = Sets.newHashSet(WhileStmt.class, ForStmt.class,
+			ForeachStmt.class, DoStmt.class);
 	private static Set<Class<?>> blockStatementsToRemove = 
 			Sets.newHashSet(IfStmt.class, WhileStmt.class, ForStmt.class, 
-					ForeachStmt.class, DoStmt.class, SwitchStmt.class);
+					ForeachStmt.class, DoStmt.class, SwitchStmt.class, LabeledStmt.class);
 
 	@Override
 	public boolean isChangePoint(Node node, MutantsGenerator mGen) {
@@ -54,7 +57,16 @@ public class SBR implements MutationOperator {
 						(node instanceof ExpressionStmt && 
 								!(ExpressionStmt.class.cast(node).getExpression() 
 										instanceof VariableDeclarationExpr)) ) ) {
-				
+
+			/*
+			 * loops inside a labeled statement are not removed
+			 * jsoup has a labeled loop (OUTER) with a continue statement inside it
+			 */
+			if (loopStatements.contains(node.getClass()) &&
+					node.getParentNode().get().getClass().equals(LabeledStmt.class)) {
+				return false;
+			}
+
 			// nested 'else if' blocks are not removed
 			if (node instanceof IfStmt &&
 					node.getParentNode().get() instanceof IfStmt) {
