@@ -85,7 +85,8 @@ public class Main {
 		CompilationUnit original = CompilationUnitSamples.createSampleCompilationUnit();
 
 		//MUTANTS GENERATION
-		CompilationUnit mutated = mg.generateMutants(original);
+		CompilationUnit mutated = original.clone();
+		mg.generateMutants(mutated);
 
 		//prompt output
 		System.out.println();

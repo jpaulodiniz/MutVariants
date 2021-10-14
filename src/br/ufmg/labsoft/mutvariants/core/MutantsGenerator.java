@@ -27,6 +27,7 @@ import com.github.javaparser.ast.type.PrimitiveType.Primitive;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 
 import br.ufmg.labsoft.mutvariants.entity.MutationInfo;
+import br.ufmg.labsoft.mutvariants.listeners.LoopListenerCallInserter;
 import br.ufmg.labsoft.mutvariants.listeners.ListenerUtil;
 import br.ufmg.labsoft.mutvariants.mutops.MutationOperator;
 import br.ufmg.labsoft.mutvariants.util.CompilationUnitSamples;
@@ -50,6 +51,9 @@ public class MutantsGenerator {
 	private Set<MutationOperator> mutationOperators;
 	private MutationVisitor mutationVisitor;
 
+	private ListenerVisitor lv = new ListenerVisitor();
+	private LoopListenerCallInserter lci = new LoopListenerCallInserter();
+
 	private List<MutationInfo> mutantsCatalog; //Issue #3
 	private List<List<String>> groupsOfMutants; //Issue #4
 	private Map<String, Set<String>> nestedMutantInfo; //Issue #2
@@ -70,7 +74,7 @@ public class MutantsGenerator {
 	private boolean allPossibleMutationsPerChangePoint = false;
 	private boolean mutateLoopConditions = false;
 	private boolean listenerCallsInstrumentation = false; // Issue #5
-	private double mutationRate = 1d; 
+	private double mutationRate = 1d;
 	private TypeSolver typeSolver;
 
 	public MutantsGenerator() {
@@ -81,6 +85,9 @@ public class MutantsGenerator {
 		this.groupsOfMutants = new ArrayList<>();
 		this.nestedMutantInfo = new HashMap<>();
 		this.blockVariablesNonInitialized = new Stack<>();
+
+		this.lv = new ListenerVisitor();
+		this.lci = new LoopListenerCallInserter();
 	}
 
 	public boolean isAllPossibleMutationsPerChangePoint() {
@@ -147,7 +154,7 @@ public class MutantsGenerator {
 	}
 
 	public Set<NameExpr> findFinalAttrsNonInitialized(TypeDeclaration<?> mClass) {
-		Set<NameExpr> finalVariablesNonInitialized = new HashSet<>(); 
+		Set<NameExpr> finalVariablesNonInitialized = new HashSet<>();
 
 		List<FieldDeclaration> finalFields = (mClass.getFields()).stream()
 				.filter(f -> f.getModifiers().contains(Modifier.FINAL))
@@ -171,9 +178,9 @@ public class MutantsGenerator {
 	 * @return list of NameExpr of such variable declarations
 	 */
 	public Set<NameExpr> findVariablesNonInitialized(BlockStmt mBlock) {
-		Set<NameExpr> variablesNonInitialized = new HashSet<>(); 
+		Set<NameExpr> variablesNonInitialized = new HashSet<>();
 
-		List<VariableDeclarationExpr> variableDeclarations = 
+		List<VariableDeclarationExpr> variableDeclarations =
 				mBlock.findAll(VariableDeclarationExpr.class,
 						// declared only in current block, not nested ones
 						v -> v.getParentNode().get().getParentNode().get().equals(mBlock));
@@ -222,16 +229,10 @@ public class MutantsGenerator {
 //		}
 	}
 
-	/**
-	 * @param original
-	 * @return
-	 */
-	public CompilationUnit generateMutants(CompilationUnit original) {
-
+	public void generateMutants(CompilationUnit compUn) {
 		int mutantsCounterPerCompUn = 0;
 
-		CompilationUnit mcu = original.clone(); //mcu: mutated compilation unit
-		List<ClassOrInterfaceDeclaration> classes = mcu.findAll(ClassOrInterfaceDeclaration.class, 
+		List<ClassOrInterfaceDeclaration> classes = compUn.findAll(ClassOrInterfaceDeclaration.class,
 				c -> !c.isInterface() && !c.isNestedType()); // neither interface nor nested class
 
 		//mutate each class in compilation unit
@@ -243,7 +244,15 @@ public class MutantsGenerator {
 		}
 
 		if (this.getListenerCallsInstrumentation()) {
-			mcu.addImport(ListenerUtil.class);
+			long before = this.lci.loopSeq;
+			for (ClassOrInterfaceDeclaration aClass : classes) {
+				aClass.accept(this.lv, this.lci);
+			}
+
+			long after = this.lci.loopSeq;
+			if (after > before) {
+				compUn.addImport(ListenerUtil.class);
+			}
 		}
 
 		if (mutantsCounterPerCompUn > 0) {
@@ -251,18 +260,14 @@ public class MutantsGenerator {
 //				mcu.addImport(Constants.MUTANT_SCHEMATA_LIB, true, true);
 //			}
 
-			mcu.addImport(Constants.MUTANTS_CLASS_PACKAGE + "." 
+			compUn.addImport(Constants.MUTANTS_CLASS_PACKAGE + "."
 					+ Constants.MUTANTS_CLASS_NAME, true, true);
 			System.out.println(">>>> " + mutantsCounterPerCompUn + " mutants seeded (in Comp. Unit).");
-
-			return mcu;
 		}
-
-		return original;
 	}
 
 	/**
-	 * 
+	 *
 	 * @return
 	 */
 	public String nextMutantVariableName() {
@@ -317,16 +322,26 @@ public class MutantsGenerator {
 			System.out.println(f);
 
 			CompilationUnit original = IO.getCompilationUnitFromFile(f);
-			CompilationUnit mutated = this.generateMutants(original);
+			CompilationUnit mutated = original.clone();
+			this.generateMutants(mutated);
 
+			boolean writeCompUn = false;
 			if (mutated.getImports().stream().anyMatch(i -> i.getNameAsString().equals(
 					Constants.MUTANTS_CLASS_PACKAGE + "." + Constants.MUTANTS_CLASS_NAME))) {
 				++countMutatedCompilationUnits;
+				writeCompUn = true;
+			}
+			else if (mutated.getImports().stream().anyMatch(i -> i.getNameAsString().equals(
+					ListenerUtil.class.getCanonicalName()))) {
+				writeCompUn = true;
+			}
+
+			if (writeCompUn) {
 				IO.writeCompilationUnit(mutated, new File(outputPath));
 			}
 		}
-		
-		
+
+
 		CompilationUnit mutantsClass = CompilationUnitSamples.createPublicCompilationUnit(
 				Constants.MUTANTS_CLASS_PACKAGE, Constants.MUTANTS_CLASS_NAME);
 //		mutantsClass.addImport(Conditional.class); //add import Conditional TODO keep?
@@ -345,7 +360,7 @@ public class MutantsGenerator {
 				.getMembers().add(0, fieldDecl);
 	*/
 	// declaring one mutant per line
-		for (MutationInfo mutInfo : this.mutantsCatalog.subList((int)qtdFOMsSoFar, 
+		for (MutationInfo mutInfo : this.mutantsCatalog.subList((int)qtdFOMsSoFar,
 				(int)this.mutantsCounterGlobal)) {
 			VariableDeclarator vd = new VariableDeclarator(new PrimitiveType(Primitive.BOOLEAN),
 					mutInfo.getMutantVariableName(), new BooleanLiteralExpr(false));

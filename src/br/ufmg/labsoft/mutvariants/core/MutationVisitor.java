@@ -24,7 +24,6 @@ import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.type.VoidType;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
-import br.ufmg.labsoft.mutvariants.listeners.ListenerCallsInserter;
 import br.ufmg.labsoft.mutvariants.mutops.MutationOperator;
 
 class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
@@ -129,36 +128,24 @@ class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 	public void visit(WhileStmt stmt, MutantsGenerator mGen) {
 		List<MutationOperator> mutOps = mGen.checkChangePoint(stmt);
 		super.visit(stmt, mGen);
-		if (mGen.getListenerCallsInstrumentation()) {
-        	ListenerCallsInserter.insertListenerCallInLoopBody(stmt.getBody(), mGen);
-        }
 		mGen.generateMutants(stmt, mutOps);
 	}
 
 	public void visit(ForStmt stmt, MutantsGenerator mGen) {
 		List<MutationOperator> mutOps = mGen.checkChangePoint(stmt);
 		super.visit(stmt, mGen);
-		if (mGen.getListenerCallsInstrumentation()) {
-			ListenerCallsInserter.insertListenerCallInLoopBody(stmt.getBody(), mGen);
-        }
 		mGen.generateMutants(stmt, mutOps);
 	}
 
 	public void visit(ForeachStmt stmt, MutantsGenerator mGen) {
 		List<MutationOperator> mutOps = mGen.checkChangePoint(stmt);
 		super.visit(stmt, mGen);
-		if (mGen.getListenerCallsInstrumentation()) {
-			ListenerCallsInserter.insertListenerCallInLoopBody(stmt.getBody(), mGen);
-        }
 		mGen.generateMutants(stmt, mutOps);
 	}
 
 	public void visit(DoStmt stmt, MutantsGenerator mGen) {
 		List<MutationOperator> mutOps = mGen.checkChangePoint(stmt);
 		super.visit(stmt, mGen);
-		if (mGen.getListenerCallsInstrumentation()) {
-			ListenerCallsInserter.insertListenerCallInLoopBody(stmt.getBody(), mGen);
-        }
 		mGen.generateMutants(stmt, mutOps);
 	}
 

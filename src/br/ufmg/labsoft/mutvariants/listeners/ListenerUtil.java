@@ -13,5 +13,10 @@ public class ListenerUtil {
 		public void listen(String operation) {
 			// may be overridden by a 'client'
 		}
+
+		@Override
+		public void listen(String loopVar, long count) {
+			// may be overridden by a 'client'
+		}
 	};
 }

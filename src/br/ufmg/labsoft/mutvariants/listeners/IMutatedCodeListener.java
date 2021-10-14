@@ -6,4 +6,5 @@ package br.ufmg.labsoft.mutvariants.listeners;
 public interface IMutatedCodeListener {
 
 	void listen(String operation);
+	void listen(String loopVar, long count);
 }
