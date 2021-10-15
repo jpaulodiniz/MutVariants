@@ -1,47 +1,60 @@
 package br.ufmg.labsoft.mutvariants.listeners;
 
 import com.github.javaparser.ast.NodeList;
-import com.github.javaparser.ast.expr.AssignExpr;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.LongLiteralExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.expr.UnaryExpr;
+import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithBody;
 import com.github.javaparser.ast.stmt.BlockStmt;
-import com.github.javaparser.ast.stmt.ForStmt;
+import com.github.javaparser.ast.stmt.LabeledStmt;
 import com.github.javaparser.ast.stmt.Statement;
+import com.github.javaparser.ast.type.PrimitiveType;
+import com.github.javaparser.ast.type.PrimitiveType.Primitive;
 
 /**
- * Issue #5
+ * Issue #5 - improvement
  */
 public class LoopListenerCallInserter {
-	public long loopSeq = 0L;
+	private long loopSeq = 0L;
+
+	public long getLoopSeq() {
+		return this.loopSeq;
+	}
+
+	private String currentLoopCounterId() {
+		return "_loopCounter" + this.loopSeq;
+	}
+
+	private void incrementLoopCounterId() {
+		this.loopSeq++;
+	}
 
 	public void generateInstrumentationInLoop(NodeWithBody<?> stmt) {
-		/*
-		 * keep this order (insert listener call, insert variable initialization, increment id)
-		 * due to the process of visiting the AST and modifying deeper nodes first 
-		 */
 		this.insertListenerCallInLoopBody(stmt.getBody());
-		this.insertLoopCounterInitializationBeforeLoop((Statement)stmt);
+
+		if (!((Statement)stmt).getParentNode().get().getClass().equals(LabeledStmt.class)) {
+			this.insertLoopCounterInitializationBeforeLoop((Statement)stmt);
+			this.incrementLoopCounterId();
+		}
+	}
+
+	public void generateInstrumentationInLabeledStatement(LabeledStmt stmt) {
+		this.insertLoopCounterInitializationBeforeLoop(stmt);
 		this.incrementLoopCounterId();
 	}
 
 	private void insertLoopCounterInitializationBeforeLoop(Statement stmt) {
-		AssignExpr initLoopCounterExpr = this.generateLoopCounterAssignmentExpr();
+		VariableDeclarationExpr initLoopCounterExpr = this.generateLoopCounterAssignmentExpr();
 
-		if (stmt instanceof ForStmt) {
-			ForStmt forStmt = (ForStmt)stmt;
-			forStmt.getInitialization().addLast(initLoopCounterExpr);
-		}
-		else {
-			BlockStmt newParent = new BlockStmt();
-			Statement clone = stmt.clone();
-			newParent.addStatement(initLoopCounterExpr);
-			newParent.addStatement(clone);
-			stmt.replace(newParent);
-		}
+		BlockStmt newParent = new BlockStmt();
+		Statement clone = stmt.clone();
+		newParent.addStatement(initLoopCounterExpr);
+		newParent.addStatement(clone);
+		stmt.replace(newParent);
 	}
 
 	private void insertListenerCallInLoopBody(Statement stmtBody) {
@@ -72,23 +85,16 @@ public class LoopListenerCallInserter {
 		return listenerCall;
 	}
 
-	private AssignExpr generateLoopCounterAssignmentExpr() {
+	private VariableDeclarationExpr generateLoopCounterAssignmentExpr() {
 		String loopId = currentLoopCounterId();
-		return new AssignExpr(new NameExpr(loopId),
-				new LongLiteralExpr(0L), AssignExpr.Operator.ASSIGN);
+		VariableDeclarator vd = new VariableDeclarator(new PrimitiveType(Primitive.LONG), 
+				loopId, new LongLiteralExpr(0L));
+		return new VariableDeclarationExpr(vd);
 	}
 
 	private UnaryExpr generateLoopCounterIncrementExpr() {
 		String loopId = currentLoopCounterId();
 		return new UnaryExpr(new NameExpr(loopId),
 				UnaryExpr.Operator.PREFIX_INCREMENT);
-	}
-
-	private String currentLoopCounterId() {
-		return "_loopCounter" + this.loopSeq;		
-	}
-
-	private void incrementLoopCounterId() {
-		this.loopSeq++;
 	}
 }

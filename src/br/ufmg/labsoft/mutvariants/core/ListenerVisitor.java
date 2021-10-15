@@ -1,8 +1,10 @@
 package br.ufmg.labsoft.mutvariants.core;
 
+import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.DoStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
 import com.github.javaparser.ast.stmt.ForeachStmt;
+import com.github.javaparser.ast.stmt.LabeledStmt;
 import com.github.javaparser.ast.stmt.WhileStmt;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
@@ -27,5 +29,10 @@ class ListenerVisitor extends VoidVisitorAdapter<LoopListenerCallInserter> {
 	public void visit(DoStmt stmt, LoopListenerCallInserter lci) {
 		super.visit(stmt, lci);
 		lci.generateInstrumentationInLoop(stmt);
+	}
+
+	public void visit(LabeledStmt stmt, LoopListenerCallInserter lci) {
+		super.visit(stmt, lci);
+		lci.generateInstrumentationInLabeledStatement(stmt);
 	}
 }

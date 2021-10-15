@@ -244,12 +244,12 @@ public class MutantsGenerator {
 		}
 
 		if (this.getListenerCallsInstrumentation()) {
-			long before = this.lci.loopSeq;
+			long before = this.lci.getLoopSeq();
 			for (ClassOrInterfaceDeclaration aClass : classes) {
 				aClass.accept(this.lv, this.lci);
 			}
 
-			long after = this.lci.loopSeq;
+			long after = this.lci.getLoopSeq();
 			if (after > before) {
 				compUn.addImport(ListenerUtil.class);
 			}
