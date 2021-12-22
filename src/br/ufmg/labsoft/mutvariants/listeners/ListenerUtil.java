@@ -5,18 +5,25 @@ package br.ufmg.labsoft.mutvariants.listeners;
  */
 public class ListenerUtil {
 
-	/**
-	 * a call to listen will be included in all places defined in Issue #5
-	 */
-	public static IMutatedCodeListener listener = new IMutatedCodeListener() {
+	public static ISimpleListener listener = new ISimpleListener() {
 		@Override
-		public void listen(String operation) {
-			// may be overridden by a 'client'
-		}
-
-		@Override
-		public void listen(String loopVar, long count) {
+		public void listen(String id) {
 			// may be overridden by a 'client'
 		}
 	};
+
+	public static ILoopListener loopListener = new ILoopListener() {
+		@Override
+		public void listen(String loopId, long count) {
+			// may be overridden by a 'client'
+		}
+	};
+
+	public static IMutantListener mutListener = new IMutantListener() {
+		@Override
+		public boolean listen(int id) {
+			// may be overridden by a 'client'
+			return false;
+		}
+	};			
 }
