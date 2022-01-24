@@ -277,7 +277,7 @@ public class MutantsGenerator {
 		if (this.mutantsPerClass.get(this.currentClassFQN) == null) {
 			this.mutantsPerClass.put(this.currentClassFQN, new ArrayList<>());
 		}
-		this.mutantsPerClass.get(this.currentClassFQN).add(mutantVariable.toString());
+		this.mutantsPerClass.get(this.currentClassFQN).add(mutantVariable);
 
 		return mutantVariable;
 	}
