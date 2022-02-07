@@ -80,41 +80,40 @@ public abstract class BinaryExpressionOperatorReplacement implements MutationOpe
 	}
 
 	protected Expression generateMutants(BinaryExpr original, MutantsGenerator mGen) {
-
-		EnumSet<Operator> mOperators = availableOperatorsForMutation(original.getOperator());
+		EnumSet<Operator> bOperators = availableOperatorsForMutation(original.getOperator());
 
 //		EnumSet<Operator> mOperators = mGen.isAllPossibleMutationsPerChangePoint() ? 
 //				availableOperatorsForMutation(original.getOperator()) :
 //				EnumSet.of(operatorForMutation(original.getOperator(), false) ); 
 
-		if (mOperators == null || mOperators.isEmpty()) return null; //<<, >>, >>>, &, |, ... TODO review 
+		if (bOperators == null || bOperators.isEmpty()) return null; //<<, >>, >>>, &, |, ... TODO review
 
 		List<String> groupOfMutants = new ArrayList<>(); //Issue #4
 
 		Expression mutantExpressionTemp = original.clone();
 
-		for (Operator op : mOperators) {
+		for (Operator bOp : bOperators) {
 
 			if (Math.random() > mGen.getMutationRate()) continue;
 
 			BinaryExpr mutated = original.clone();
-			mutated.setOperator(op);
+			mutated.setOperator(bOp);
 
-			String mutantVariableName = mGen.nextMutantVariableName();
-			groupOfMutants.add(mutantVariableName);
+			Expression mutantExpression = mGen.nextMutantAccessExpression();
+			groupOfMutants.add(mGen.currentMutantId());
 
 			//generation mutant information for mutants catalog
 			MutationInfo mInfo = new MutationInfo();
-			mInfo.setMutantVariableName(mutantVariableName);
+			mInfo.setMutantId(mGen.currentMutantId());
 			mInfo.setMutationOperator(this.getName());
 			mInfo.setInfoBeforeMutation(original.getOperator().asString());
-			mInfo.setInfoAfterMutation(op.asString());
+			mInfo.setInfoAfterMutation(bOp.asString());
 			mInfo.setMutatedClass(mGen.currentClassFQN);
 			mInfo.setMutatedOperation(mGen.currentOperation);
 			mGen.addMutantInfoToCatalog(mInfo);
 
 			mutantExpressionTemp = new ConditionalExpr(
-					new NameExpr(mutantVariableName), 
+					mutantExpression,
 					new EnclosedExpr(mutated),
 					new EnclosedExpr(mutantExpressionTemp.clone()));
 		}
