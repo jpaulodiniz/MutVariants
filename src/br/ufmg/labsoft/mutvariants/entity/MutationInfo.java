@@ -7,7 +7,7 @@ package br.ufmg.labsoft.mutvariants.entity;
  */
 public class MutationInfo {
 	
-	private String mutantVariableName; //mutant id
+	private String mutantId;
 	private String mutationOperator;
 
 	private String mutatedClass;
@@ -16,12 +16,12 @@ public class MutationInfo {
 	private String infoBeforeMutation;
 	private String infoAfterMutation;
 	
-	public String getMutantVariableName() {
-		return mutantVariableName;
+	public String getMutantId() {
+		return mutantId;
 	}
 
-	public void setMutantVariableName(String mutantVariableName) {
-		this.mutantVariableName = mutantVariableName;
+	public void setMutantId(String mutantId) {
+		this.mutantId = mutantId;
 	}
 
 	public String getMutationOperator() {
@@ -67,7 +67,7 @@ public class MutationInfo {
 	public String toString() {
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append(mutantVariableName).append(',');
+		sb.append(mutantId).append(',');
 		sb.append(mutationOperator).append(',');
 		sb.append(mutatedClass).append(',');
 		sb.append(mutatedOperation).append(',');
