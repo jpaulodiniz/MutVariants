@@ -63,7 +63,6 @@ public class MutantsGenerator {
 	private List<List<String>> groupsOfMutants; //Issue #4
 	private Map<String, Set<String>> nestedMutantInfo; //Issue #2
 
-	@Deprecated private Map<String, List<String>> mutantsPerClass; //key: class FQN; value: list of mutants
 	public String currentClassFQN; //helper field: current class fully qualified name (FQN)
 
 	public Set<NameExpr> classFinalAttributesNonInitialized;
@@ -86,7 +85,6 @@ public class MutantsGenerator {
 	public MutantsGenerator() {
 		this.mutationOperators = new HashSet<>();
 		this.mutationVisitor = new MutationVisitor();
-		this.mutantsPerClass = new HashMap<>();
 		this.mutantsCatalog = new ArrayList<>();
 		this.groupsOfMutants = new ArrayList<>();
 		this.nestedMutantInfo = new HashMap<>();
@@ -245,18 +243,16 @@ public class MutantsGenerator {
 	}
 
 	public void generateMutants(CompilationUnit compUn) {
-		int mutantsCounterPerCompUn = 0;
-
 		List<ClassOrInterfaceDeclaration> classes = compUn.findAll(ClassOrInterfaceDeclaration.class,
 				c -> !c.isInterface() && !c.isNestedType()); // neither interface nor nested class
 
 		//mutate each class in compilation unit
+		int mBefore = this.mutantsCounterGlobal;
 		for (ClassOrInterfaceDeclaration aClass : classes) {
 			this.generateMutants(aClass);
-			if (this.mutantsPerClass.get(this.currentClassFQN) != null) {
-				mutantsCounterPerCompUn += this.mutantsPerClass.get(this.currentClassFQN).size();
-			}
 		}
+		int mAfter = this.mutantsCounterGlobal;
+		int mutantsCounterPerCompUn = mAfter - mBefore;
 
 		if (this.getListenerCallsInstrumentation()) {
 			long before = this.lci.getLoopSeq();
@@ -314,14 +310,7 @@ public class MutantsGenerator {
 	}
 
 	private String nextMutantVariableName() {
-
 		String mutantVariable = buildMutantVariableName(this.mutantsCounterGlobal++);
-
-		if (this.mutantsPerClass.get(this.currentClassFQN) == null) {
-			this.mutantsPerClass.put(this.currentClassFQN, new ArrayList<>());
-		}
-		this.mutantsPerClass.get(this.currentClassFQN).add(mutantVariable);
-
 		return mutantVariable;
 	}
 
