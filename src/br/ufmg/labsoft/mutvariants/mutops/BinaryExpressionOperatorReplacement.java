@@ -4,16 +4,12 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
-import br.ufmg.labsoft.mutvariants.core.MutantsGenerator;
-import br.ufmg.labsoft.mutvariants.entity.MutationInfo;
-
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.BinaryExpr.Operator;
 import com.github.javaparser.ast.expr.ConditionalExpr;
 import com.github.javaparser.ast.expr.EnclosedExpr;
 import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.stmt.DoStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
 import com.github.javaparser.ast.stmt.ForStmt;
@@ -21,6 +17,9 @@ import com.github.javaparser.ast.stmt.ForeachStmt;
 import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.WhileStmt;
+
+import br.ufmg.labsoft.mutvariants.core.MutantsGenerator;
+import br.ufmg.labsoft.mutvariants.entity.MutationInfo;
 
 public abstract class BinaryExpressionOperatorReplacement implements MutationOperator {
 

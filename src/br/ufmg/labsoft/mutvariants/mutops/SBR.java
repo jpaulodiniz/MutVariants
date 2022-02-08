@@ -3,11 +3,13 @@ package br.ufmg.labsoft.mutvariants.mutops;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.AssignExpr;
+import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.UnaryExpr;
@@ -44,6 +46,8 @@ public class SBR implements MutationOperator {
 	private static Set<Class<?>> blockStatementsToRemove = 
 			Sets.newHashSet(IfStmt.class, WhileStmt.class, ForStmt.class, 
 					ForeachStmt.class, DoStmt.class, SwitchStmt.class, LabeledStmt.class);
+
+	private Stack<Integer> currentMutantIds = new Stack<>();
 
 	@Override
 	public boolean isChangePoint(Node node, MutantsGenerator mGen) {
@@ -149,6 +153,7 @@ public class SBR implements MutationOperator {
 				}
 			}
 
+			this.currentMutantIds.push(mGen.lastMutantGenerated());
 			return true;
 		}
 
@@ -175,35 +180,49 @@ public class SBR implements MutationOperator {
 	private Statement generateMutants(Statement stmt, MutantsGenerator mGen) {
 
 		Statement originalStmt = stmt.clone(); 
-		String mutantVariableName = mGen.nextMutantVariableName();
+		Expression mutAccessExpr = mGen.nextMutantAccessExpression();
 		
-		//!_mut#
-		UnaryExpr mutExpr = new UnaryExpr(new NameExpr(mutantVariableName), 
+		//generating !mutAccessExpr
+		UnaryExpr mutExpr = new UnaryExpr(mutAccessExpr,
 				UnaryExpr.Operator.LOGICAL_COMPLEMENT);
 
-		//if (!_mut#) { <original_statement> }
+		//generating if (!mutAccessExpr) { <original_statement> }
 		IfStmt mutIfStmt = new IfStmt(mutExpr, 
 				new BlockStmt(NodeList.nodeList(originalStmt)), null);
 
 		//generation mutant information for mutants catalog
 		MutationInfo mInfo = new MutationInfo();
 		mInfo.setMutationOperator(this.getName());
-		mInfo.setMutantVariableName(mutantVariableName);
+		mInfo.setMutantId(mGen.currentMutantId());
 		mInfo.setInfoBeforeMutation(this.extractStatementClassName(stmt));
 		mInfo.setInfoAfterMutation("removal");
 		mInfo.setMutatedClass(mGen.currentClassFQN);
 		mInfo.setMutatedOperation(mGen.currentOperation);
 		mGen.addMutantInfoToCatalog(mInfo);
-		
-		Set<String> nested = this.findNestedMutantNames(stmt);
-		if (!nested.isEmpty()) {
-			mGen.addNestedMutantsInfo(mutantVariableName, nested);
+
+//		Set<String> nested = this.findNestedMutantNames(stmt);
+//		if (!nested.isEmpty()) {
+//			mGen.addNestedMutantsInfo(mGen.currentMutantId(), nested);
+//		}
+
+		int currentMutant = mGen.lastMutantGenerated();
+		int firstNested = this.currentMutantIds.pop() + 1;
+		if (currentMutant > firstNested) {
+			int lastNested = currentMutant - 1;
+			mGen.addNestedMutantsInfo(currentMutant, firstNested, lastNested);
 		}
 
 		/*
-		 * handling issues with code like
-		 * if (cond) expr1; 
-		 * else expr2;
+		 * Handling code like
+		 *  if (cond) expr1;
+		 *  else expr2;
+		 * to prevent the mutant if to take the else for it.
+		 * The correct mutated statement:
+		 *  if (cond)
+		 *  {
+		 *    if (!mutId) { expr1; }
+		 *  }
+		 *  else expr2;
 		 */
 		if (stmt.getParentNode().get() instanceof IfStmt) {
 			IfStmt parent = (IfStmt)stmt.getParentNode().get();
@@ -217,17 +236,15 @@ public class SBR implements MutationOperator {
 	
 	/**
 	 * nested mutant variable names nested in current block 'being removed'
-	 * @param stmt
-	 * @return
 	 */
+	@Deprecated
 	private Set<String> findNestedMutantNames(Statement stmt) {
 		return stmt.findAll(NameExpr.class).stream()
-				.filter( x -> x.getNameAsString().startsWith(Constants.MUTANT_VARIABLE_PREFIX2 ))
+				.filter(x -> x.getNameAsString().startsWith(Constants.MUTANT_VARIABLE_PREFIX2))
 				.map(x -> x.toString()).collect(Collectors.toSet());
 	}
 
 	private String extractStatementClassName(Statement stmt) {
-		
 		String className = stmt.getClass().getName();
 		int idx = className.lastIndexOf('.') + 1;
 		return className.substring(idx);
