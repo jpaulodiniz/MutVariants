@@ -2,6 +2,7 @@ package br.ufmg.labsoft.mutvariants.listeners;
 
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.LongLiteralExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
@@ -78,9 +79,10 @@ public class LoopListenerCallInserter {
 	 */
 	private MethodCallExpr generateListenerCallExprForLoopCounter() {
 		//TODO dinamically retrieve the listener object instantiated in this package
-		MethodCallExpr listenerCall = new MethodCallExpr(new NameExpr("ListenerUtil.listener"),
+		MethodCallExpr listenerCall = new MethodCallExpr(
+				new FieldAccessExpr(new NameExpr(ListenerUtil.class.getSimpleName()), "loopListener"),
 				"listen",
-				NodeList.nodeList(new StringLiteralExpr(this.currentLoopCounterId()), 
+				NodeList.nodeList(new StringLiteralExpr(this.currentLoopCounterId()),
 						this.generateLoopCounterIncrementExpr()));
 		return listenerCall;
 	}
