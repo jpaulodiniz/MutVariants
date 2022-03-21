@@ -42,8 +42,7 @@ import br.ufmg.labsoft.mutvariants.util.IO;
 /*
  * TODO(s)
  * - verify if Java bitwise operators could be mutated
- * - seek for interfaces with default methods and check whether there was something to mutate
- * - don't mutate main methods
+ * - seek for interfaces with default methods and check if there is something to mutate
  * - [+-] don't mutate Exception classes
  */
 

@@ -25,6 +25,7 @@ import com.github.javaparser.ast.type.VoidType;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 
 import br.ufmg.labsoft.mutvariants.mutops.MutationOperator;
+import br.ufmg.labsoft.mutvariants.util.MethodUtil;
 
 class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 
@@ -62,6 +63,9 @@ class MutationVisitor extends VoidVisitorAdapter<MutantsGenerator> {
 
 	@Override
 	public void visit(MethodDeclaration methodDecl, MutantsGenerator mGen) {
+		if (MethodUtil.isMainMethod(methodDecl)) {
+			return;
+		}
 
 		if (!methodDecl.getBody().isPresent()) { // not abstract, not default in an interface
 			return;
