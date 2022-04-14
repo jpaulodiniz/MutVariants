@@ -12,32 +12,39 @@ import br.ufmg.labsoft.mutvariants.listeners.LoopListenerCallInserter;
 import br.ufmg.labsoft.mutvariants.util.MethodUtil;
 
 class ListenerVisitor extends VoidVisitorAdapter<LoopListenerCallInserter> {
+	@Override
 	public void visit(MethodDeclaration methodDecl, LoopListenerCallInserter lci) {
 		if (MethodUtil.isMainMethod(methodDecl)) {
 			return;
 		}
+		super.visit(methodDecl, lci);
 	}
 
+	@Override
 	public void visit(WhileStmt stmt, LoopListenerCallInserter lci) {
 		super.visit(stmt, lci);
 		lci.generateInstrumentationInLoop(stmt);
 	}
 
+	@Override
 	public void visit(ForStmt stmt, LoopListenerCallInserter lci) {
 		super.visit(stmt, lci);
 		lci.generateInstrumentationInLoop(stmt);		
 	}
 
+	@Override
 	public void visit(ForeachStmt stmt, LoopListenerCallInserter lci) {
 		super.visit(stmt, lci);
 		lci.generateInstrumentationInLoop(stmt);
 	}
 
+	@Override
 	public void visit(DoStmt stmt, LoopListenerCallInserter lci) {
 		super.visit(stmt, lci);
 		lci.generateInstrumentationInLoop(stmt);
 	}
 
+	@Override
 	public void visit(LabeledStmt stmt, LoopListenerCallInserter lci) {
 		super.visit(stmt, lci);
 		lci.generateInstrumentationInLabeledStatement(stmt);
